@@ -1,3 +1,1 @@
-from .models import (Blogger, Campaign, ClicksDate, ExcludedOption,
-                     GoogleAnalyticsDataGraph, GoogleAnalyticsDataTable,
-                     UTMLink)
+from .models import UTMLink, ExcludedOption, Campaign, ClicksDate, GoogleAnalyticsDataGraph,GoogleAnalyticsDataTable, Blogger
