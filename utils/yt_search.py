@@ -1,66 +1,72 @@
 import re
 
+from config import Config
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from app import db
-from config import Config
 from models import Blogger
 
 
 def get_channel_video_views(api_key, channel_id):
-    youtube = build('youtube', 'v3', developerKey=api_key)
+    youtube = build("youtube", "v3", developerKey=api_key)
     try:
         # Получаем информацию о плейлисте "uploads" канала
-        channel_info = youtube.channels().list(
-            part='contentDetails',
-            id=channel_id
-        ).execute()
-        uploads_playlist_id = channel_info['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+        channel_info = (
+            youtube.channels().list(part="contentDetails", id=channel_id).execute()
+        )
+        uploads_playlist_id = channel_info["items"][0]["contentDetails"][
+            "relatedPlaylists"
+        ]["uploads"]
 
         # Получаем список последних 10 видео канала
-        playlist_items = youtube.playlistItems().list(
-            part='snippet',
-            playlistId=uploads_playlist_id,
-            maxResults=10
-        ).execute()
+        playlist_items = (
+            youtube.playlistItems()
+            .list(part="snippet", playlistId=uploads_playlist_id, maxResults=10)
+            .execute()
+        )
 
-        video_ids = [item['snippet']['resourceId']['videoId'] for item in playlist_items['items']]
+        video_ids = [
+            item["snippet"]["resourceId"]["videoId"] for item in playlist_items["items"]
+        ]
 
         video_views = []
         # Получаем статистику для каждого видео
         for video_id in video_ids:
-            video_response = youtube.videos().list(
-                part='statistics',
-                id=video_id
-            ).execute()
-            views = int(video_response['items'][0]['statistics']['viewCount'])
+            video_response = (
+                youtube.videos().list(part="statistics", id=video_id).execute()
+            )
+            views = int(video_response["items"][0]["statistics"]["viewCount"])
             video_views.append(views)
 
         return calculate_average_views(video_views)
 
     except HttpError as e:
-        print(f'Произошла ошибка HTTP {e.resp.status}: {e.content}')
+        print(f"Произошла ошибка HTTP {e.resp.status}: {e.content}")
         return None
 
 
 # Функция для получения ID канала и сохранения его в базу данных
 def get_and_save_channel_id(api_key, username, name):
-    youtube = build('youtube', 'v3', developerKey=api_key)
+    youtube = build("youtube", "v3", developerKey=api_key)
     try:
         # Получаем информацию о канале по имени пользователя
-        channel_response = youtube.search().list(
-            part='id',
-            type='channel',
-            maxResults=1,
-            q=username  # Параметр q для поиска по имени пользователя
-        ).execute()
-        if 'items' not in channel_response or not channel_response['items']:
-            print('Канал с указанным именем пользователя не найден.')
+        channel_response = (
+            youtube.search()
+            .list(
+                part="id",
+                type="channel",
+                maxResults=1,
+                q=username,  # Параметр q для поиска по имени пользователя
+            )
+            .execute()
+        )
+        if "items" not in channel_response or not channel_response["items"]:
+            print("Канал с указанным именем пользователя не найден.")
             return None
 
         # Получаем ID канала
-        channel_id = channel_response['items'][0]['id']['channelId']
+        channel_id = channel_response["items"][0]["id"]["channelId"]
 
         # Сохраняем информацию о блогере в базу данных
         blogger = Blogger(name=name, yt_channel_id=channel_id)
@@ -70,7 +76,7 @@ def get_and_save_channel_id(api_key, username, name):
         return channel_id
 
     except HttpError as e:
-        print(f'Произошла ошибка HTTP {e.resp.status}: {e.content}')
+        print(f"Произошла ошибка HTTP {e.resp.status}: {e.content}")
         return None
 
 

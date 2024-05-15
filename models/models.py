@@ -1,5 +1,6 @@
-from app import db
 from sqlalchemy.orm import relationship
+
+from app import db
 
 
 class ExcludedOption(db.Model):
@@ -14,16 +15,18 @@ class UTMLink(db.Model):
     campaign_content = db.Column(db.String(50), nullable=True)
     campaign_source = db.Column(db.String(50), nullable=False)
     campaign_medium = db.Column(db.String(50), nullable=False)
-    campaign_name = db.Column(db.String(50), db.ForeignKey('campaign.name'), nullable=False)
+    campaign_name = db.Column(
+        db.String(50), db.ForeignKey("campaign.name"), nullable=False
+    )
     domain = db.Column(db.String(20), nullable=False)
     slug = db.Column(db.String(50), nullable=False)
     short_id = db.Column(db.String(20), nullable=True)
     short_secure_url = db.Column(db.String(20), nullable=True)
-    #clicks_count = db.Column(db.Integer, default=0)
-    #clicks_count24h = db.Column(db.Integer, default=0)
-    #clicks_count1w = db.Column(db.Integer, default=0)
-    #clicks_count2w = db.Column(db.Integer, default=0)
-    #clicks_count3w = db.Column(db.Integer, default=0)
+    # clicks_count = db.Column(db.Integer, default=0)
+    # clicks_count24h = db.Column(db.Integer, default=0)
+    # clicks_count1w = db.Column(db.Integer, default=0)
+    # clicks_count2w = db.Column(db.Integer, default=0)
+    # clicks_count3w = db.Column(db.Integer, default=0)
 
     campaign = relationship("Campaign", back_populates="links")
 
@@ -43,7 +46,7 @@ class Campaign(db.Model):
 
 class ClicksDate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    link_id = db.Column(db.Integer, db.ForeignKey('utm_link.id'), nullable=False)
+    link_id = db.Column(db.Integer, db.ForeignKey("utm_link.id"), nullable=False)
     date = db.Column(db.Date, nullable=False)
     clicks_count = db.Column(db.Integer, default=0)
 
