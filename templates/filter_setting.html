@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Filter settings {% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/filter_set.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Get filtered table</h1>
+{% if error_message %}
+    <div class="error-message">{{ error_message }}</div>
+{% endif %}
+    <div class="main-content">
+        <form method="post" action="/filter_setting">
+            <label for="url">URL:</label>
+            <select name="url" id="url" multiple>
+              <option value="" disabled>Select or Enter url</option>
+                {% for id in unique_url %}
+                    <option value="{{ id[0] }}">{{ id[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="campaign_source">Campaign Source:</label>
+            <select name="campaign_source" id="campaign_source" multiple>
+                <option value="" disabled>Select Campaign Source</option>
+                {% for source in unique_campaign_sources %}
+                    <option value="{{ source[0] }}">{{ source[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="campaign_medium">Campaign Medium:</label>
+            <select name="campaign_medium" id="campaign_medium" multiple>
+                <option value="" disabled>Select Campaign Medium</option>
+                {% for medium in unique_campaign_mediums %}
+                    <option value="{{ medium[0] }}">{{ medium[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="campaign_name">Campaign Name:</label>
+            <select name="campaign_name" id="campaign_name" multiple>
+                <option value="" disabled>Select Campaign Name</option>
+                {% for name in unique_campaign_names %}
+                    <option value="{{ name[0] }}">{{ name[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="campaign_content">Campaign Content:</label>
+            <select name="campaign_content" id="campaign_content" multiple>
+              <option value="" disabled>Select Campaign Content</option>
+                {% for content in unique_campaign_contents %}
+                    <option value="{{ content[0] }}">{{ content[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="date_from">Start Date:</label>
+            <input type="date" id="date_from" name="date_from">
+
+            <label for="date_to">End date:</label>
+            <input type="date" id="date_to" name="date_to">
+
+            <h3>It may take a few minutes depending on the number of links.</h3>
+            <input id="submit" type="submit" value="Get report">
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                var date = new Date(); // Get current date
+
+                var dateString = date.toISOString().split('T')[0]; // Format date as "YYYY-MM-DD"
+                document.getElementById('date_to').value = dateString; // Set default date input value to today
+              });
+            </script>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/date-defaults.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}New observe{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/yt_bloggers.css') }}">
+{% endblock %}
+
+{% block content %}
+    {% if error_message %}
+        <div class="error-message" style="color: red; font-weight: bold;">{{ error_message }}</div>
+    {% endif %}
+    <form method="post">
+        <label for="social_name">Enter blogger name:</label>
+        <input class="field" id="social_name" name="social_name" type="text">
+
+        <label for="yt_name">Youtube channel name:</label>
+        <input class="field" id="yt_name" name="yt_name" type="text">
+
+        <input type="submit">
+    </form>
+
+    <h1>List of Bloggers</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>YouTube Average Views</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for blogger in bloggers %}
+            <tr>
+                <td>{{ blogger.name }}</td>
+                <td>{{ blogger.yt_avg }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

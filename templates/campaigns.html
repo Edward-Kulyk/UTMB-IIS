@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns Overview{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/campaign_result.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% block script %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="static/js/campaign_overview.js"> </script>
+    <script src="static/js/graph.js"> </script>
+{% endblock %}
+{% endblock %}
+
+
+
+{% block content %}
+
+    <h1>Campaigns Overview</h1>
+    {% for campaign_data in aggregate_campaign_data %}
+    <div class="table_title">
+        <h2>{{ campaign_data.campaign_name }} - [Launch Date: {{ campaign_data.start_date }}]</h2>
+        <button class="copy-btn">Copy table</button>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr class="table-hidden">
+                    <td colspan="100%">
+                        <div>
+                            <div>
+                                <input type="checkbox" id="clicks-checkbox-{{ loop.index }}" checked>
+                                <label for="clicks-checkbox-{{ loop.index }}">Clicks</label>
+                                <input type="checkbox" id="sessions-checkbox-{{ loop.index }}" checked>
+                                <label for="sessions-checkbox-{{ loop.index }}">Sessions</label>
+                            </div>
+                        </div>
+                        <!-- Используйте colspan для расширения ячейки на всю ширину таблицы -->
+                        <div class="campaign-graph" id="graph-{{ loop.index }}">
+                            <!-- Добавляем элемент canvas для графика -->
+                            <canvas id="graph-canvas-{{ loop.index }}"></canvas>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Short Secure URLs</th>
+                    <th>Campaign Contents</th>
+                    <th>Campaign Sources</th>
+                    <th>Campaign Mediums</th>
+                    <th class="clicks-details hidden">Clicks 24h</th>
+                    <th class="clicks-details hidden">Clicks W1</th>
+                    <th class="clicks-details hidden">Clicks W2</th>
+                    <th class="clicks-details hidden">Clicks W3</th>
+                    <th>Total Clicks</th>
+                    <th class="clicks-details hidden">Users</th>
+                    <th class="clicks-details hidden">Sessions</th>
+                    <th class="clicks-details hidden">Avg session duration</th>
+                    <th class="clicks-details hidden">Bounce rate</th>
+                    <th>Actions
+                        <button class="toggle-details-btn">
+                            <img src="static/images/expand.png" alt="Show/Hide Details" />
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for link_info in campaign_data.links %}
+                    <tr id="row-{{ link_info.short_id }}" class="table-hidden">
+                        <td class="short-url">{{ link_info.short_secure_url }}</td>
+                        <td>{{ link_info.campaign_content }}</td>
+                        <td>{{ link_info.campaign_source }}</td>
+                        <td>{{ link_info.campaign_medium }}</td>
+                        <td class="clicks-details hidden">{{ link_info.clicks_1d }}</td>
+                        <td class="clicks-details hidden">{{ link_info.clicks_7d }}</td>
+                        <td class="clicks-details hidden">{{ link_info.clicks_14d }}</td>
+                        <td class="clicks-details hidden">{{ link_info.clicks_21d }}</td>
+                        <td>{{ link_info.clicks_total }}</td>
+                        <td class="clicks-details hidden">{{ link_info.ga_active_users }}</td>
+                        <td class="clicks-details hidden">{{ link_info.ga_sessions }}</td>
+                        <td class="clicks-details hidden">{{ link_info.ga_average_session_duration }}</td>
+                        <td class="clicks-details hidden">{{ link_info.bounce_rate }}</td>
+                        <td class="actions-cell">
+                            <!-- Добавление кнопок редактирования и удаления для каждой строки -->
+                            <button class="edit-btn" data-id="{{ link_info.short_id }}"><img src="static\images\edit.png" alt="Edit"></button>
+                            <button class="delete-btn" data-id="{{ link_info.short_id }}"><img src="static\images\delete.png" alt="Delete"></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr class="total-clicks">
+                    <td colspan="4">Total Clicks</td>
+                    <td class="clicks-details hidden">{{ campaign_data.clicks_1d }}</td>
+                    <td class="clicks-details hidden">{{ campaign_data.clicks_7d }}</td>
+                    <td class="clicks-details hidden">{{ campaign_data.clicks_14d }}</td>
+                    <td class="clicks-details hidden">{{ campaign_data.clicks_21d }}</td>
+                    <td>{{ campaign_data.clicks_total }}</td>
+                    <td class="clicks-details hidden">{{ campaign_data.ga_active_users }}</td>
+                    <td class="clicks-details hidden">{{ campaign_data.ga_sessions }}</td>
+                    <td class="clicks-details hidden">-</td>
+                    <td class="clicks-details hidden">-</td>
+                    <td>
+                        <button class="toggle-visibility-btn-table">
+                           <img src="static/images/expand.png" alt="Show/Hide Details" />
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+<script>
+var campaignData = {{ graph_data|tojson|safe }};
+campaignData = JSON.parse(campaignData);
+  // Построение графика для каждой кампании
+  campaignData.forEach(function(campaign, index) {
+    buildGraph(campaign, 'graph-' + (index + 1),campaign.start_date);
+  });
+</script>
+{% endblock %}
+

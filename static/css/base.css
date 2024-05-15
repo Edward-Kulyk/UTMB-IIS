@@ -1,0 +1,126 @@
+/* Общие стили для всего сайта */
+@font-face {
+  font-family: "TTNormsPro";
+  src: url("/static/fonts/TTNormsPro.ttf") format("truetype");
+}
+
+body {
+  font-family: "TTNormsPro";
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  background-image: url('/static/images/symbol_BG.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* Изображение будет неподвижным при скроллинге */
+  background-position: center right; /* Логотип будет расположен правее центра */
+  background-size: contain; /* Логотип будет полностью виден */
+}
+
+/* Стили для хедера */
+.header {
+  background-color: #004a7c; /* Темно-синий цвет фона хедера */
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+.header a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  padding: 20px;
+  font-size: 15pt;
+  font-weight: bold;
+  transition: background-color 0.3s, color 0.3s; /* Плавные переходы */
+  display: block; /* Растягивание ссылок на всю высоту паддинга */
+}
+
+.header a:hover {
+  background-color: white; /* Белый фон ячейки при наведении */
+  color: #004a7c; /* Темно-синий текст при наведении */
+  text-decoration: none;
+}
+
+/* Стили для футера */
+.footer {
+  background-color: #002a4d; /* Более темный оттенок синего */
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 14px;
+}
+.sidebar {
+    height: 100%;
+    width: 60px; /* Ширина сайдбара с иконками */
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    background-color: #004a7c;
+    overflow-x: hidden;
+    transition: 0.5s; /* Плавное появление сайдбара */
+    padding-top: 60px; /* Выравнивание иконок по вертикали */
+}
+
+.sidebar:hover {
+    width: 200px; /* Увеличиваем ширину сайдбара при наведении */
+    left: 0; /* Показываем сайдбар */
+}
+
+.sidebar a {
+    padding: 10px 0; /* Уменьшим горизонтальные отступы */
+    font-size: 15pt;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    transition: 0.3s;
+    text-align: center; /* Центрирование иконок */
+    white-space: nowrap;
+    display: flex; /* Сделаем контейнер flex контейнером */
+    align-items: center;
+    padding-left:13px;
+}
+
+.sidebar a:hover {
+    background-color: white;
+    color: #004a7c;
+}
+
+.close-btn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.content {
+    transition: margin-left .5s;
+    padding: 16px;
+    margin-left: 60px; /* Ширина сайдбара */
+}
+
+.link-text {
+    display: none; /* Скрываем текст по умолчанию */
+}
+
+.sidebar:hover .link-text {
+    display: inline; /* Показываем текст при наведении на ссылку */
+    vertical-align: super ;
+}
+.sidebar:hover .img {
+    transform: translateX(0); /* Возвращаем иконку в исходное положение */
+}
+
+.sidebar img {
+    width:25px;
+    transition: transform 0.3s ease;
+    padding-right:10px;
+    filter: brightness(0) invert(1);
+}

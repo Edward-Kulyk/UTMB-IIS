@@ -1,0 +1,69 @@
+body {
+  background-color: #f4f4f4; /* Фон всей страницы */
+  font-family: 'TTNormsPro', Arial, sans-serif; /* Основной шрифт */
+}
+
+h1 {
+  color: #004a7c; /* Цвет заголовка */
+  text-align: center; /* Выравнивание заголовка */
+}
+
+table {
+  width: 70%; /* Ширина таблицы */
+  margin: 2vh auto;
+  border-collapse: collapse; /* Убрать двойные границы */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* Тень таблицы */
+  background-color: #ffffff; /* Фон таблицы */
+  border-radius: 10px; /* Скругление углов таблицы */
+  overflow: hidden; /* Скрыть переполнение для поддержки скругления */
+  margin-bottom:100px;
+}
+
+thead {
+  background-color: #004a7c; /* Фон заголовков таблицы */
+  color: #ffffff; /* Цвет текста заголовков */
+}
+
+.form-group {
+  display: flex;
+  align-items: center; /* Выравнивание элементов по центру по вертикали */
+  margin-bottom: 20px; /* Отступ снизу */
+}
+
+th, td {
+  text-align: left; /* Выравнивание текста в ячейках */
+  padding: 12px 15px; /* Отступы в ячейках */
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2; /* Чередование фона строк */
+}
+
+.edit-btn img, .save-btn img {
+  width: 20px; /* Ширина иконок */
+  cursor: pointer; /* Курсор в виде указателя */
+}
+
+/* Стили для кнопок редактирования и сохранения */
+.edit-btn, .save-btn {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+/* Стиль для чекбоксов "скрыть" */
+.hide-checkbox {
+  accent-color: #004a7c; /* Цвет для чекбокса */
+}
+
+/* Стиль для полей ввода даты */
+.date-input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.campaign-graph{
+    width:100%;
+    height:600px;
+}

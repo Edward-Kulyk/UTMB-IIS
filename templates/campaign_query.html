@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Campaigns Overview{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/campaign_name_creation.css') }}">
+  {% block script %}
+  {% endblock %}
+{% endblock %}
+
+{% block content %}
+<h1>Download campaign report</h1>
+  <form method="post">
+    <label for="campaign_name_query">Campaign Name:</label>
+    <select name="campaign_name_query" id="campaign_name_query" required>
+        {% for name in campaign_names %}
+            <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Get excel report">
+  </form>
+{% endblock %}

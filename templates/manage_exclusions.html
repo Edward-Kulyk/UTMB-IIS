@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Exclusions{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/options_management.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <h1>Manage Exclusions</h1>
+    <form method="POST" class="form-section">
+        <div class="form-group full-width">
+            <label for="include_urls">URL</label>
+            <select id="include_urls" name="include_urls[]" multiple>
+                {% for url in excluded_urls %}
+                    <option value="{{ url.option_value }}">{{ url.option_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group half-width">
+            <label for="include_campaign_sources">Sources</label>
+            <select id="include_campaign_sources" name="include_campaign_sources[]" multiple>
+                {% for source in excluded_campaign_sources %}
+                    <option value="{{ source.option_value }}">{{ source.option_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group half-width">
+            <label for="include_campaign_mediums">Mediums</label>
+            <select id="include_campaign_mediums" name="include_campaign_mediums[]" multiple>
+                {% for medium in excluded_campaign_mediums %}
+                    <option value="{{ medium.option_value }}">{{ medium.option_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group half-width">
+            <label for="include_campaign_contents">Contents</label>
+            <select id="include_campaign_contents" name="include_campaign_contents[]" multiple>
+                {% for content in excluded_campaign_contents %}
+                    <option value="{{ content.option_value }}">{{ content.option_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group half-width">
+            <label for="include_campaign_names">Names</label>
+            <select id="include_campaign_names" name="include_campaign_names[]" multiple>
+                {% for name in excluded_campaign_names %}
+                    <option value="{{ name.option_value }}">{{ name.option_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="exclude-button-container">
+            <button type="submit" class="update-exclusions">Update Exclusions</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+/* Styles specific to the upload page */
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 200vh; /* Make sure the container fills the whole viewport height */
+    padding-top: 80px; /* Adjust this value if your header has a different height */
+}
+
+.upload-form{
+    width:100%
+}
+
+/* Large drag-and-drop file upload box */
+.upload-box {
+    width: 80%; /* Relative to the container for responsiveness */
+    max-width: 700px; /* Maximum width of the box */
+    height: 400px; /* Height of the box */
+    margin: 0 auto 30px; /* Center the box horizontally with margin at the bottom */
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; /* Stack children vertically */
+    background-color: #f8f9fa; /* Light grey background */
+    border: 4px dashed #ccc; /* Dashed border */
+    border-radius: 10px; /* Slightly rounded corners */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Soft shadow for depth */
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.upload-box:hover {
+    border-color: #007bff; /* Change color on hover */
+}
+
+/* Style adjustments for the 'Upload Files' button */
+.upload-btn {
+    font-size: 16px;
+    color: #ffffff;
+    background-color: #007bff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+}
+
+.upload-btn:hover, .upload-btn:focus {
+    background-color: #0056b3;
+}
+
+/* Styles for the rest of the form and elements */
+.date-picker {
+    width: 100%; /* Match the upload box width */
+    margin: 0 auto; /* Center it horizontally */
+}
+
+.date-label, .drag-text {
+    text-align: center; /* Center text */
+    margin-bottom: 1rem; /* Space below the label */
+}
+
+.date-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.submit-btn {
+    width: 100%; /* Match the upload box width */
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    margin: 20px auto; /* Space above and center horizontally */
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #218838;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .upload-container {
+        padding-top: 60px; /* Adjust the padding for smaller screens */
+    }
+
+    .upload-box, .date-picker, .submit-btn {
+        width: 90%; /* Full width for smaller screens */
+    }
+
+    .upload-btn, .date-input, .submit-btn {
+        padding: 8px 16px; /* Adjust button paddings for smaller screens */
+    }
+}

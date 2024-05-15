@@ -1,0 +1,69 @@
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
+form {
+  width: 40%; /* Форма будет на 40px меньше ширины экрана */
+  max-width: 1100px; /* Ограничим максимальную ширину, если экран очень широкий */
+  padding: 20px;
+  margin: 2vh auto; /* Небольшой вертикальный отступ и центрирование */
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background-color: #ffffff;
+  box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+  font-color: #5E6165;
+}
+
+input[type="text"], select {
+  box-sizing: border-box; /* включаем padding и border в общую ширину */
+  width: 100%; /* ширина относительно родительского элемента */
+  padding: 10px; /* внутренние отступы */
+  margin: 0 0 10px; /* отступ снизу */
+  border: 1px solid #ccc; /* стиль границы */
+  border-radius: 4px; /* Скругление углов кнопки */
+}
+
+input[type=submit] {
+  background-color: #004a7c; /* Темно-синий фон кнопки, как у хедера */
+  color: white; /* Белый текст кнопки */
+  padding: 10px 15px; /* Внутренний отступ для кнопки */
+  border: none; /* Убрать границу для кнопки */
+  border-radius: 4px; /* Скругление углов кнопки */
+  cursor: pointer; /* Курсор в виде указателя */
+  margin-top: 20px; /* Отступ сверху для кнопки */
+}
+
+input[type=submit]:hover {
+  background-color: #003366; /* Темнее синий фон для кнопки при наведении */
+}
+
+h1 {
+  color: #004a7c;
+  text-align: center;
+}
+
+table {
+  width: 70%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+thead {
+  background-color: #004a7c;
+  color: #ffffff;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px 15px;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}

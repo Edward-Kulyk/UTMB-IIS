@@ -1,0 +1,187 @@
+
+h1 {
+  color: #004a7c;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.table-container {
+  background-color: #fff;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width:80%;
+  margin-top:0px;
+  overflow-x: auto;
+  max-width: 80%;
+}
+
+.copy-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  background-color: #0056b3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background-color: #00397a;
+}
+
+/* Стили для кнопок внутри ячейки */
+.edit-btn, .delete-btn {
+  border: solid 0.5px black;
+  border-radius: 4px; /* Скругляем углы рамки */
+  padding: 5px 10px; /* Добавляем отступы внутри кнопок */
+  background-color: #fff; /* Фон кнопки */
+  color: #333; /* Цвет текста кнопки */
+  text-decoration: none; /* Убираем подчеркивание текста, если это ссылки */
+  cursor: pointer;
+}
+
+.edit-btn:hover, .delete-btn:hover {
+  border-color: #004a7c; /* Цвет рамки при наведении */
+}
+
+h2 {
+  color: #333;
+  font-size: 18px;
+  margin: auto;
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  margin-top: 20px;
+  margin: auto;
+  width:100%
+}
+
+table thead {
+  background-color: #004a7c;
+  color: #fff;
+}
+
+table th, table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+table th {
+  text-align: left;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.edit-btn img, .delete-btn img {
+  width: 20px;
+}
+
+.edit-btn, .delete-btn {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.total-clicks {
+  font-weight: bold;
+}
+
+.table_title {
+  display: flex;
+  justify-content: space-between; /* Равномерное распределение свободного пространства */
+  align-items: center; /* Выравнивание по центру по вертикали */
+  padding: 10px;
+  padding-bottom: 0px;
+  margin-bottom: -10px;
+  width:70%;
+  margin:auto;
+}
+
+.copy-btn {
+padding: 10px 20px;
+background-color: #0056b3;
+color: #fff;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+margin-right: auto; /* Автоматический отступ слева для выравнивания по правому краю */
+}
+
+.copy-btn:hover {
+background-color: #00397a;
+}
+
+h2 {
+flex: 1; /* Заголовок займет все доступное пространство */
+text-align: center;
+color: #333;
+font-size: 18px;
+}
+
+.hidden {
+  display: none;
+}
+
+.show {
+  display: table-cell;
+  transition: all 0.3s ease;
+}
+
+/* Для анимированного появления можно использовать opacity */
+.fade-in {
+  opacity: 0;
+  animation: fadeInAnimation 0.5s forwards; /* forwards сохраняет конечное состояние анимации */
+}
+
+@keyframes fadeInAnimation {
+  to {
+    opacity: 1;
+  }
+}
+.toggle-details-btn {
+  background: none; /* Убираем фон */
+  border: none; /* Убираем границу */
+  cursor: pointer; /* Курсор в виде руки, подсказывающий, что это кнопка */
+}
+
+.toggle-details-btn img {
+  width: 20px; /* Или другой размер, который тебе нужен */
+  height: auto; /* Для сохранения пропорций изображения */
+  filter: grayscale(100%);
+}
+.actions-cell{
+    width:100px;
+}
+
+.short-url{
+    max-width:300px;
+    text-wrap: wrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.table-hidden{
+    display:none;
+    background-color:white;
+}
+
+.toggle-visibility-btn-table img {
+  width: 20px; /* Или другой размер, который тебе нужен */
+  height: auto; /* Для сохранения пропорций изображения */
+  filter: grayscale(100%);
+}
+
+label{
+    color : black;
+}
+
+.campaign-graph{
+    max-height :600px;
+}

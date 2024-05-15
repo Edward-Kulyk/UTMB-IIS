@@ -1,0 +1,87 @@
+/* filter_set.css */
+.charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    width:75%;
+    margin:auto;
+}
+
+.chart-container {
+    flex-basis: 90%; /* Элементы будут занимать примерно половину пространства, но можно настроить */
+    margin-bottom: 20px;
+}
+
+/* Стилизация таблицы с результатами */
+table {
+    width: 100%; /* Полная ширина */
+    border-collapse: collapse; /* Убираем двойные границы */
+    margin-top: 20px; /* Отступ сверху */
+    width:75%;
+    margin:auto;
+}
+
+table th, table td {
+    border: 1px solid #ccc; /* Светло-серые границы */
+    padding: 10px; /* Отступы внутри ячеек */
+    text-align: left; /* Выравнивание текста по левому краю */
+}
+
+table th {
+    background-color: #007bff; /* Синий фон заголовков */
+    color: white; /* Белый текст */
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2; /* Чередующийся цвет фона строк */
+}
+
+table tr:hover {
+    background-color: #ddd; /* Цвет фона при наведении */
+}
+
+table tfoot th {
+    background-color: #555; /* Темно-серый фон подвала */
+    color: white; /* Белый текст */
+}
+
+/* Стилизация кнопки "Copy table" */
+.copy-btn {
+    padding: 5px 10px;
+    background-color: #28a745; /* Зеленый фон */
+    color: white; /* Белый текст */
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.copy-btn:hover {
+    background-color: #218838; /* Темно-зеленый фон при наведении */
+}
+
+/* Общие стили для кнопок редактирования и удаления */
+.actions-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.edit-btn img, .delete-btn img {
+    height: 20px; /* Размер иконок */
+}
+
+/* Заголовок страницы */
+h1 {
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* Стилизация сообщений об ошибках, если они есть */
+.error-message {
+    color: #dc3545; /* Красный цвет текста для ошибок */
+    background-color: #f8d7da; /* Светло-красный фон */
+    padding: 10px;
+    border-radius: 5px;
+    margin: 20px 0;
+}

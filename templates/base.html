@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>ASUS UTM builder</title>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{{ url_for('main.index') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/home.svg') }}" alt="Home icon">
+            <span class="link-text"> Home</span>
+        </a>
+        <a href="{{ url_for('main.add_campaign')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/new_campaign.svg') }}" alt="Home icon">
+            <span class="link-text"> New campaign</span>
+        </a>
+        <a href="{{ url_for('main.edit_campaing_name_list')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/list.svg') }}" alt="Home icon">
+            <span class="link-text"> Campaign list</span>
+        </a>
+        <a href="{{ url_for('main.campaigns') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/graph.svg') }}" alt="Home icon">
+            <span class="link-text"> Statistic</span>
+        </a>
+        <a href="{{ url_for('main.manage_exclusions') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/plus.svg') }}" alt="Home icon">
+            <span class="link-text"> Options </span>
+        </a>
+        <a href="{{ url_for('main.exclude_options') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/minus.svg') }}" alt="Home icon">
+            <span class="link-text"> Options </span>
+        </a>
+        <a href="{{ url_for('main.filter_setting')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/filter.svg') }}" alt="Home icon">
+            <span class="link-text">Filter(beta)</span>
+        </a>
+        <a href="{{ url_for('main.data_stamp')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/date.svg') }}" alt="Home icon">
+            <span class="link-text"> Photo edit</span>
+        </a>
+        <a href="{{ url_for('main.query')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/download.svg') }}" alt="Home icon">
+            <span class="link-text"> Query</span>
+        </a>
+        <a href="{{ url_for('main.bloggers_page')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/youtube.svg') }}" alt="Home icon">
+            <span class="link-text"> Youtubers stat</span>
+        </a>
+    </div>
+
+    <div class="content">
+
+    </div>
+
+    {% block content %}{% endblock %}
+
+
+
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='/js/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/script.js') }}"></script>
+    {% endblock %}
+</body>
+</html>

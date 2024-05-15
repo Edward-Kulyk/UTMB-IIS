@@ -1,0 +1,64 @@
+.main-content {
+  background-color: #fff; /* Белый фон для контента */
+  border-radius: 8px; /* Скругленные углы */
+  padding: 20px; /* Внутренние отступы */
+  width: 70%;
+  margin: 20px auto; /* Выравнивание по центру с вертикальными отступами */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для объемного эффекта */
+  height: 80%;
+  margin-bottom:50px;
+}
+
+h1 {
+  color: #333; /* Цвет заголовка */
+  margin-bottom: 20px; /* Отступ снизу заголовка */
+}
+
+.form-section {
+  display: flex; /* Использование Flexbox для выравнивания элементов формы */
+  flex-wrap: wrap; /* Перенос элементов при нехватке места */
+  gap: 20px; /* Отступы между элементами формы */
+}
+
+.form-group {
+  width: 100%; /* Полная ширина для группы по умолчанию */
+}
+
+.form-group.half-width {
+  width: calc(50% - 10px); /* Половина ширины с учетом отступов */
+}
+
+.form-group label {
+  display: block; /* Метка на всю ширину */
+  margin-bottom: 5px; /* Отступ снизу метки */
+}
+
+.form-group select {
+  width: 100%; /* Полная ширина селекта */
+  padding: 10px; /* Внутренний отступ */
+  border-radius: 4px; /* Скругление углов */
+  border: 1px solid #ddd; /* Граница */
+  min-height:200px;
+}
+
+.update-exclusions {
+  background-color: #0056b3; /* Цвет кнопки */
+  color: white; /* Цвет текста кнопки */
+  padding: 10px 20px; /* Отступы внутри кнопки */
+  border: none; /* Убираем границу */
+  border-radius: 4px; /* Скругляем углы */
+  cursor: pointer; /* Курсор в виде руки */
+  font-size: 16px; /* Размер шрифта текста в кнопке */
+  width: 100%; /* Ширина кнопки */
+  max-width: 200px; /* Максимальная ширина кнопки */
+  box-sizing: border-box; /* Размеры включают padding и border */
+}
+
+.update-exclusions:hover {
+  background-color: #00397a; /* Цвет кнопки при наведении */
+}
+
+.exclude-button-container {
+  display: flex; /* Используем flex для выравнивания кнопки */
+  justify-content: center; /* Центрируем кнопку */
+}

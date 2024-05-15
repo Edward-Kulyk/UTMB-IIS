@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Photo Upload{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <form id="upload-form" class="upload-form">
+        <div id="upload-box" class="upload-box">
+            <label for="file-input" class="upload-btn">
+                <i class="fas fa-upload"></i> Upload Files
+                <span id="file-name"> or drag and drop files here.</span> <!-- Span to show file name -->
+            </label>
+            <input type="file" id="file-input" name="photo" accept="image/*" hidden>
+        </div>
+        <div class="date-picker">
+            <label for="date" class="date-label">Select Date:</label>
+            <input required type="date" id="date" name="date" class="date-input">
+        </div>
+        <button type="submit" class="submit-btn">Get Files</button>
+    </form>
+</div>
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}
