@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "utmb-iis"
+version = "0.1.0"
+description = "utm builder for asus for windows server"
+authors = ["Eduard Kulyk <kulikeduard89@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+apscheduler = "^3.10.4"
+flask = "^3.0.3"
+flask-apscheduler = "^1.13.1"
+flask-sqlalchemy = "^3.1.1"
+google-api-python-client = "^2.129.0"
+google-auth-oauthlib = "^1.2.0"
+google-analytics-data = "^0.18.8"
+pandas = "^2.2.2"
+pillow = "^10.3.0"
+requests = "^2.31.0"
+waitress = "^3.0.0"
+xlsxwriter = "^3.2.0"
+black = "^24.4.2"
+isort = "^5.13.2"
+ruff = "^0.4.4"
+mypy = "^1.10.0"
+pre-commit = "^3.7.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
