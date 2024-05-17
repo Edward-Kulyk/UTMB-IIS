@@ -35,18 +35,14 @@ build-backend = "poetry.core.masonry.api"
 src_paths = ["UTMB-IIS"]
 known_local_folder = ["UTMB-IIS/"]
 line_length = 120
+skip = ["wfastcgi.py"]
 profile = "black"
 
 [tool.black]
 line_length = 120
 include = '\.pyi?$'
-exclude = '''
-/(
-  \.venv
-  | migrations
-  | wfastcgi.py
-)/
-'''
+exclude = "wfastcgi.py"
+
 
 [tool.mypy]
 files = ["UTMB-IIS"]
