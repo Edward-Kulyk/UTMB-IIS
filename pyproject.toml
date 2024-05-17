@@ -30,3 +30,33 @@ mypy = "^1.10.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+src_paths = ["UTMB-IIS"]
+known_local_folder = ["UTMB-IIS/"]
+line_length = 120
+profile = "black"
+
+[tool.black]
+line_length = 120
+include = '\.pyi?$'
+exclude = '''
+/(
+  \.venv
+  | migrations
+  | wfastcgi.py
+)/
+'''
+
+[tool.mypy]
+files = ["UTMB-IIS"]
+ignore_missing_imports = true
+exclude = '''
+(?x)^(
+  .*/migrations/.*
+  | .*/tests/.*
+)$
+'''
+
+[tool.ruff]
+exclude = ["wfastcgi.py"]
