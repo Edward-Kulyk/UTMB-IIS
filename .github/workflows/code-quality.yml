@@ -10,7 +10,9 @@ jobs:
       with:
         python-version: "3.12"
     - run: pip install --upgrade pip
-    - run: pip install "ruff<1""black<23" "isort<6"
+    
+    - run: pip install "ruff<1" "black<23" "isort<6" 
+
     - run: ruff check .
     - run: black --check .
     - run: isort --check --profile black .
