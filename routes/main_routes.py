@@ -4,7 +4,6 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 import pandas as pd
-from config import Config
 from flask import Blueprint, jsonify, redirect, render_template, request, send_file, session
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google_auth_oauthlib.flow import Flow
@@ -12,6 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy import func, not_
 
 from app import db
+from config import Config
 from models import (
     Blogger,
     Campaign,

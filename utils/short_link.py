@@ -3,10 +3,10 @@ import time
 from datetime import datetime, timedelta
 
 import requests
-from config import Config
 from sqlalchemy import not_
 
 from app import db
+from config import Config
 from models import Campaign, ClicksDate, UTMLink
 
 

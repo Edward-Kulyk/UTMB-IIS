@@ -4,14 +4,14 @@ from app import Base, db
 
 
 class ExcludedOption(Base):
-    __tablename__ = 'excluded_options'
+    __tablename__ = "excluded_options"
     id = db.Column(db.Integer, primary_key=True)
     option_type = db.Column(db.String(50), nullable=False)
     option_value = db.Column(db.String(255), nullable=False)
 
 
 class UTMLink(Base):
-    __tablename__ = 'utm_link'
+    __tablename__ = "utm_link"
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(255), nullable=False)
     campaign_content = db.Column(db.String(50), nullable=True)
@@ -29,7 +29,7 @@ class UTMLink(Base):
 
 
 class Campaign(Base):
-    __tablename__ = 'campaign'
+    __tablename__ = "campaign"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     url_by_default = db.Column(db.String(255), nullable=True)
@@ -41,7 +41,7 @@ class Campaign(Base):
 
 
 class ClicksDate(Base):
-    __tablename__ = 'clicks_date'
+    __tablename__ = "clicks_date"
     id = db.Column(db.Integer, primary_key=True)
     link_id = db.Column(db.Integer, db.ForeignKey("utm_link.id"), nullable=False)
     date = db.Column(db.Date, nullable=False)
@@ -51,7 +51,7 @@ class ClicksDate(Base):
 
 
 class GoogleAnalyticsDataGraph(Base):
-    __tablename__ = 'google_analytics_data_graph'
+    __tablename__ = "google_analytics_data_graph"
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     session_source_medium = db.Column(db.String(255), nullable=False)
@@ -62,7 +62,7 @@ class GoogleAnalyticsDataGraph(Base):
 
 
 class GoogleAnalyticsDataTable(Base):
-    __tablename__ = 'google_analytics_data_table'
+    __tablename__ = "google_analytics_data_table"
     id = db.Column(db.Integer, primary_key=True)
     session_source_medium = db.Column(db.String(255))
     url = db.Column(db.String(255))
@@ -74,7 +74,7 @@ class GoogleAnalyticsDataTable(Base):
 
 
 class Blogger(Base):
-    __tablename__ = 'blogger'
+    __tablename__ = "blogger"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     yt_channel_id = db.Column(db.String, unique=True)

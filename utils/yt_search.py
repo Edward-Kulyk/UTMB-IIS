@@ -1,10 +1,10 @@
 import re
 
-from config import Config
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from app import db
+from config import Config
 from models import Blogger
 
 

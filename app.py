@@ -1,9 +1,10 @@
 from apscheduler.schedulers.base import STATE_RUNNING
-from config import Config
 from flask import Flask
 from flask_apscheduler import APScheduler
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+
+from config import Config
 
 
 class Base(DeclarativeBase):
