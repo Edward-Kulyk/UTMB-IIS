@@ -1,15 +1,15 @@
 from sqlalchemy.orm import relationship
 
-from app import db
+from app import Base, db
 
 
-class ExcludedOption(db.Model):
+class ExcludedOption(Base):
     id = db.Column(db.Integer, primary_key=True)
     option_type = db.Column(db.String(50), nullable=False)
     option_value = db.Column(db.String(255), nullable=False)
 
 
-class UTMLink(db.Model):
+class UTMLink(Base):
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(255), nullable=False)
     campaign_content = db.Column(db.String(50), nullable=True)
@@ -26,7 +26,7 @@ class UTMLink(db.Model):
     clicks = relationship("ClicksDate", back_populates="link")
 
 
-class Campaign(db.Model):
+class Campaign(Base):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     url_by_default = db.Column(db.String(255), nullable=True)
@@ -37,7 +37,7 @@ class Campaign(db.Model):
     links = relationship("UTMLink", back_populates="campaign")
 
 
-class ClicksDate(db.Model):
+class ClicksDate(Base):
     id = db.Column(db.Integer, primary_key=True)
     link_id = db.Column(db.Integer, db.ForeignKey("utm_link.id"), nullable=False)
     date = db.Column(db.Date, nullable=False)
@@ -46,7 +46,7 @@ class ClicksDate(db.Model):
     link = relationship("UTMLink", back_populates="clicks")
 
 
-class GoogleAnalyticsDataGraph(db.Model):
+class GoogleAnalyticsDataGraph(Base):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     session_source_medium = db.Column(db.String(255), nullable=False)
@@ -56,7 +56,7 @@ class GoogleAnalyticsDataGraph(db.Model):
     content = db.Column(db.String(255), nullable=False)
 
 
-class GoogleAnalyticsDataTable(db.Model):
+class GoogleAnalyticsDataTable(Base):
     id = db.Column(db.Integer, primary_key=True)
     session_source_medium = db.Column(db.String(255))
     url = db.Column(db.String(255))
@@ -67,7 +67,7 @@ class GoogleAnalyticsDataTable(db.Model):
     content = db.Column(db.String(255))
 
 
-class Blogger(db.Model):
+class Blogger(Base):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     yt_channel_id = db.Column(db.String, unique=True)
