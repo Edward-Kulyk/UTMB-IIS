@@ -19,11 +19,6 @@ class UTMLink(db.Model):
     slug = db.Column(db.String(50), nullable=False)
     short_id = db.Column(db.String(20), nullable=True)
     short_secure_url = db.Column(db.String(20), nullable=True)
-    # clicks_count = db.Column(db.Integer, default=0)
-    # clicks_count24h = db.Column(db.Integer, default=0)
-    # clicks_count1w = db.Column(db.Integer, default=0)
-    # clicks_count2w = db.Column(db.Integer, default=0)
-    # clicks_count3w = db.Column(db.Integer, default=0)
 
     campaign = relationship("Campaign", back_populates="links")
 

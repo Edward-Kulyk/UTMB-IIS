@@ -47,12 +47,8 @@ exclude = "wfastcgi.py"
 [tool.mypy]
 files = ["UTMB-IIS"]
 ignore_missing_imports = true
-exclude = '''
-(?x)^(
-  .*/migrations/.*
-  | .*/tests/.*
-)$
-'''
+exclude = ["wfastcgi.py"]
+
 
 [tool.ruff]
 exclude = ["wfastcgi.py"]

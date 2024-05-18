@@ -110,46 +110,6 @@ def get_clicks_total(short_id):
             return 0  # Возвращаем 0 при других ошибках
 
 
-# def aggregate_clicks(short_ids, startDate, endDate):
-#     clicks_aggregated = defaultdict(int)
-#     clicks_by_short_id = {}
-#     os_aggregated = defaultdict(int)
-#     country_aggregated = defaultdict(int)  # New dictionary for country aggregation
-#
-#     for short_id in short_ids:
-#         url = f"https://api-v2.short.io/statistics/link/{short_id}"
-#         querystring = {"period": "custom", "tz": "UTC", 'startDate': startDate, "endDate": endDate}
-#
-#         headers = {
-#             'accept': "*/*",
-#             'authorization': Config.SHORT_IO_API_KEY
-#         }
-#
-#         for attempt in range(6):  # Try up to 5 times on 429 error
-#             response = requests.get(url, headers=headers, params=querystring)
-#             print(response.json())
-#             if response.status_code == 429:
-#                 time.sleep(2 ** attempt)  # Exponential backoff
-#             elif response.status_code == 200:
-#                 data = response.json()
-#                 clicks_by_short_id[short_id] = data.get("humanClicks", 0)
-#                 for entry in data.get("clickStatistics", {}).get("datasets", [])[0].get("data", []):
-#                     clicks_aggregated[entry["x"][:10]] += int(entry["y"])  # Aggregate clicks by dates
-#                 for os_data in data.get('os', []):
-#                     os_aggregated[os_data['os']] += os_data['score']
-#                 for country_data in data.get('country', []):  # Correct key for country data
-#                     country_aggregated[country_data['countryName']] += country_data['score']
-#                 break  # Break the loop after a successful request
-#             else:
-#                 break  # Break the loop on other errors
-#
-#     # Convert data for chart usage
-#     os_data_for_chart = [{'os': os, 'score': score} for os, score in os_aggregated.items()]
-#     country_data_for_chart = [{'country': country, 'score': score} for country, score in country_aggregated.items()]
-#     clicks_data = [{'x': date, 'y': clicks} for date, clicks in clicks_aggregated.items()]
-#     return sorted(clicks_data, key=lambda x: x['x']), clicks_by_short_id, os_data_for_chart  # Sort data by date
-
-
 def aggregate_clicks(short_ids, date_from, date_to):
     # Initialize dictionaries to store clicks data
     clicks_data = {}
