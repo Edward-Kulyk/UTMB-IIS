@@ -13,9 +13,9 @@ jobs:
     - name: Install linters
       run: |
         pip install --upgrade pip
-        pip install "ruff" "black" "isort"
-        pip install poetry
-        poetry install 
+        pip install "ruff" "black" "isort" "mypy"
+        pip install SQLAlchemy
+        pip install types-requests
 
     - name: Ruff check
       run: ruff check .
@@ -27,6 +27,4 @@ jobs:
       run: black --check .
 
     - name: mypy check
-      run: |
-        mypy --install-types
-        mypy . --explicit-package-bases
+      run: mypy . --explicit-package-bases
