@@ -14,7 +14,6 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install "ruff==0.4.4" "black==24.4.2" "isort==5.13.2" "mypy==1.10.0"
-        pip install SQLAlchemy
         pip install types-requests
 
     - name: Ruff check
