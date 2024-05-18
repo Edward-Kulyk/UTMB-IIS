@@ -1,5 +1,6 @@
-from app import db
 from sqlalchemy.orm import relationship
+
+from app import db
 
 
 class ExcludedOption(db.Model):

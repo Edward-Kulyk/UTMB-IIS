@@ -1,6 +1,7 @@
+from sqlalchemy import distinct
+
 from app import db
 from models import ExcludedOption, UTMLink
-from sqlalchemy import distinct
 
 
 def unique_list_tags():

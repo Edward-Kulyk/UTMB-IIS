@@ -4,11 +4,14 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 import pandas as pd
-from app import db
 from config import Config
 from flask import Blueprint, jsonify, redirect, render_template, request, send_file, session
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google_auth_oauthlib.flow import Flow
+from PIL import Image, ImageDraw, ImageFont
+from sqlalchemy import func, not_
+
+from app import db
 from models import (
     Blogger,
     Campaign,
@@ -18,8 +21,6 @@ from models import (
     GoogleAnalyticsDataTable,
     UTMLink,
 )
-from PIL import Image, ImageDraw, ImageFont
-from sqlalchemy import func, not_
 from utils.db_utils import generate_campaign_excel, get_campaign_info, get_graph_info
 from utils.ga4_requests import build_analytics_request_graph, build_analytics_request_table
 from utils.short_link import create_short_link, delete_link, edit_link, update_clicks_count

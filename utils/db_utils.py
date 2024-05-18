@@ -1,9 +1,10 @@
 from datetime import timedelta
 
 import xlsxwriter as xlsxwriter
+from sqlalchemy import and_, func
+
 from app import db
 from models import ClicksDate, GoogleAnalyticsDataGraph, GoogleAnalyticsDataTable, UTMLink
-from sqlalchemy import and_, func
 
 
 def get_top_5_source_medium_for_campaign(campaign_url):
