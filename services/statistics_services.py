@@ -1,8 +1,7 @@
-import json
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import timedelta
 from io import BytesIO
-from typing import Any, Dict, List, Sequence, Union
+from typing import Any, List, Sequence
 
 import xlsxwriter
 from sqlalchemy import Column
@@ -18,7 +17,6 @@ from crud import (
     get_graph_data,
 )
 from database import get_db
-from models import Campaign
 
 
 def campaign_list(list_type: bool = None) -> list[dict[str, Any]]:
@@ -94,9 +92,12 @@ def campaign_info(campaign_id: int) -> Sequence[Any]:
     return links_data + ga_other
 
 
-def ga_data_format(url: Column[str] | str, campaign_source: Column[str] | str,
-                   campaign_medium: Column[str] | str,
-                   campaign_content: Column[str] | str) -> dict[str, object]:
+def ga_data_format(
+    url: Column[str] | str,
+    campaign_source: Column[str] | str,
+    campaign_medium: Column[str] | str,
+    campaign_content: Column[str] | str,
+) -> dict[str, object]:
     ga_info = {
         "ga_active_users": 0,
         "ga_sessions": 0,
@@ -226,6 +227,7 @@ def filtered_statistic(form_data: dict) -> list:
             }
             if None not in (link.url, link.campaign_source, link.campaign_medium, link.campaign_content):
                 link_info.update(
-                    ga_data_format(link.url, link.campaign_source, link.campaign_medium, link.campaign_content))
+                    ga_data_format(link.url, link.campaign_source, link.campaign_medium, link.campaign_content)
+                )
             links_data.append(link_info)
     return links_data

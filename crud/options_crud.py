@@ -1,7 +1,7 @@
-from typing import Any, List, Sequence
+from typing import Any
 
 import sqlalchemy
-from sqlalchemy import Row, RowMapping, delete, distinct, select
+from sqlalchemy import delete, distinct, select
 from sqlalchemy.orm import Session
 
 from models import ExcludedOption, UTMLink

@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient, RunReportResponse
 from google.auth import credentials, load_credentials_from_file
-from urllib3.util.util import to_str
 
 from config import Config
 from crud import get_campaign_list, insert_or_update_data

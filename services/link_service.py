@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from time import strptime
 from typing import Any, Dict
 
 from flask import jsonify
@@ -102,10 +101,7 @@ def get_default_values_service(campaign_name: str) -> dict:
     with get_db() as db:
         campaign = get_default_values(db, campaign_name)
         if campaign:
-            return {
-                "url_by_default": campaign.url_by_default,
-                "domain_by_default": campaign.domain_by_default
-            }
+            return {"url_by_default": campaign.url_by_default, "domain_by_default": campaign.domain_by_default}
         else:
             return {"error": "Campaign not found"}
 
@@ -120,16 +116,15 @@ def edit_campaign_row(campaign_id: int, data: Dict[str, str]) -> tuple[bool, str
         hide = False if data["hide"].lower() == "false" else True
 
         stmt = select(Campaign).where(Campaign.id == campaign_id)
-        campaign = db.execute(stmt).scalar()
+        campaign = db.execute(stmt).first()
 
-        if campaign:
-            campaign.name = data["name"]
-            campaign.url_by_default = data["url_by_default"]
-            campaign.domain_by_default = data["domain_by_default"]
-            campaign.start_date = start_date
-            campaign.hide = hide
+        if not campaign:
+            return False, "campaign not found"
+        campaign.name = data["name"]
+        campaign.url_by_default = data["url_by_default"]
+        campaign.domain_by_default = data["domain_by_default"]
+        campaign.start_date = start_date
+        campaign.hide = hide
 
-            db.commit()
-            return True, "Row updated successfully"
-        else:
-            return False, "Campaign not found"
+        db.commit()
+        return True, "Row updated successfully"

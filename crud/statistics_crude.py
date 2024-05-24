@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence
 
 from sqlalchemy import Column, ColumnElement, Row, Select, and_, func, insert, select, tuple_, update
 from sqlalchemy.orm import Session
@@ -18,8 +18,12 @@ def get_campaign_links(db: Session, campaign_name: Column[str] | str) -> List[UT
     return db.execute(stmt).scalars().all()
 
 
-def get_click_count(db: Session, link_id: Column[int] | int, start_date: Optional[ColumnElement[date] | date] = None,
-                    end_date: Optional[ColumnElement[date] | None] = None) -> int:
+def get_click_count(
+    db: Session,
+    link_id: Column[int] | int,
+    start_date: Optional[ColumnElement[date] | date] = None,
+    end_date: Optional[ColumnElement[date] | None] = None,
+) -> int:
     stmt = select(func.sum(ClicksDate.clicks_count)).where(ClicksDate.link_id == link_id)
 
     if start_date and end_date:
@@ -31,8 +35,8 @@ def get_click_count(db: Session, link_id: Column[int] | int, start_date: Optiona
 
 
 def get_ga_data(
-        db: Session, url: Column[str] | str, source_medium: Column[str] | str,
-        content: Column[str] | str) -> Row[tuple[int, int, int, float]] | None:
+    db: Session, url: Column[str] | str, source_medium: Column[str] | str, content: Column[str] | str
+) -> Row[tuple[int, int, int, float]] | None:
     ga_data = (
         select(
             GoogleAnalyticsDataTable.active_users,
@@ -50,7 +54,9 @@ def get_ga_data(
     return ga_result
 
 
-def get_ga_data_other(db: Session, url: Column[str] | str, source_medium: list, content: list) -> Sequence[Row[tuple[str, str, int, int, int, float]]]:
+def get_ga_data_other(
+    db: Session, url: Column[str] | str, source_medium: list, content: list
+) -> Sequence[Row[tuple[str, str, int, int, int, float]]]:
     ga_data = (
         select(
             GoogleAnalyticsDataTable.content,
@@ -79,8 +85,8 @@ def get_graph_data(db: Session, campaign_name: Column[str] | str) -> Sequence[Ro
         .outerjoin(
             GoogleAnalyticsDataGraph,
             (
-                    concat(UTMLink.campaign_source, " / ", UTMLink.campaign_medium)
-                    == GoogleAnalyticsDataGraph.session_source_medium
+                concat(UTMLink.campaign_source, " / ", UTMLink.campaign_medium)
+                == GoogleAnalyticsDataGraph.session_source_medium
             )
             & (UTMLink.url == GoogleAnalyticsDataGraph.url),
         )

@@ -1,5 +1,3 @@
-from typing import Any
-
 from flask import Blueprint, jsonify, render_template, request
 
 from services import (

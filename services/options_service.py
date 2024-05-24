@@ -1,4 +1,3 @@
-from flask import request
 from werkzeug.datastructures import MultiDict
 
 from crud import add_excluded_option, delete_excluded_option, excluded_list, unique_list
@@ -24,7 +23,7 @@ def get_options_context(action: str) -> dict[str, list]:
         }
 
 
-def process_option_form(form_data: MultiDict , action: str) -> None:
+def process_option_form(form_data: MultiDict, action: str) -> None:
     """
     Process option form data.
 
