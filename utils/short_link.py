@@ -3,13 +3,11 @@ import time
 from datetime import datetime, timedelta
 
 import requests
-from sqlalchemy import not_
 
 from config import Config
 from crud import get_clicks_date, get_link, get_utm_links
 from crud.link_crud import add_clicks_date, update_clicks_date
 from database import get_db
-from models import Campaign, ClicksDate, UTMLink
 
 
 def create_short_link(domain, slug, long_url):
@@ -72,7 +70,7 @@ def get_clicks_filter(short_id, startDate, endDate):
     for attempt in range(8):  # Попытаемся до 5 раз при ошибке 429
         response = requests.get(url, headers=headers, params=querystring)
         if response.status_code == 429:
-            time.sleep(2 ** attempt)  # Экспоненциальная задержка
+            time.sleep(2**attempt)  # Экспоненциальная задержка
         elif response.status_code == 200:
             return response.json()
         else:
@@ -88,7 +86,7 @@ def get_clicks_total(short_id):
     for attempt in range(6):  # Попытаемся до 5 раз при ошибке 429
         response = requests.get(url, headers=headers, params=querystring)
         if response.status_code == 429:
-            time.sleep(2 ** attempt)  # Экспоненциальная задержка
+            time.sleep(2**attempt)  # Экспоненциальная задержка
         elif response.status_code == 200:
             clicks = response.json().get("humanClicks", 0)
             return clicks

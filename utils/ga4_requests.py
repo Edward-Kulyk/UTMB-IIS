@@ -6,8 +6,10 @@ from sqlalchemy import ColumnElement
 
 # noinspection PyTypeChecker
 def build_analytics_request_graph(
-        property_id: str | ColumnElement[str], url: str | ColumnElement[str],
-        start_date: datetime | ColumnElement[date], end_date: datetime | ColumnElement[date]
+    property_id: str | ColumnElement[str],
+    url: str | ColumnElement[str],
+    start_date: datetime | ColumnElement[date],
+    end_date: datetime | ColumnElement[date],
 ) -> RunReportRequest:
     request = RunReportRequest(
         property=f"properties/{property_id}",
@@ -35,8 +37,10 @@ def build_analytics_request_graph(
 
 # noinspection PyTypeChecker
 def build_analytics_request_table(
-        property_id: str | ColumnElement[str], url: str | ColumnElement[str],
-        start_date: datetime | ColumnElement[date], end_date: datetime | ColumnElement[date]
+    property_id: str | ColumnElement[str],
+    url: str | ColumnElement[str],
+    start_date: datetime | ColumnElement[date],
+    end_date: datetime | ColumnElement[date],
 ) -> RunReportRequest:
     request = RunReportRequest(
         property=f"properties/{property_id}",
