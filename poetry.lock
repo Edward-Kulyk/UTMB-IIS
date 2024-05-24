@@ -267,21 +267,6 @@ flask = ">=2.2.5,<4.0.0"
 python-dateutil = ">=2.4.2"
 
 [[package]]
-name = "flask-sqlalchemy"
-version = "3.1.1"
-description = "Add SQLAlchemy support to your Flask application."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "flask_sqlalchemy-3.1.1-py3-none-any.whl", hash = "sha256:4ba4be7f419dc72f4efd8802d69974803c37259dd42f3913b0dcf75c9447e0a0"},
-    {file = "flask_sqlalchemy-3.1.1.tar.gz", hash = "sha256:e4b68bb881802dda1a7d878b2fc84c06d1ee57fb40b874d3dc97dabfa36b8312"},
-]
-
-[package.dependencies]
-flask = ">=2.2.5"
-sqlalchemy = ">=2.0.16"
-
-[[package]]
 name = "google-analytics-data"
 version = "0.18.8"
 description = "Google Analytics Data API client library"
@@ -1397,4 +1382,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "4acf227ea44e3016c291cc50bda3cb9a70a073d7ab14ee6506f54a99a26bc2d9"
+content-hash = "8f18d8e831f9f77191de6e338edc25951107fce87be3fdc38c9cae72fb944b11"

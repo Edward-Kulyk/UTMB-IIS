@@ -10,7 +10,6 @@ python = "^3.12"
 apscheduler = "^3.10.4"
 flask = "^3.0.3"
 flask-apscheduler = "^1.13.1"
-flask-sqlalchemy = "^3.1.1"
 google-api-python-client = "^2.129.0"
 google-auth-oauthlib = "^1.2.0"
 google-analytics-data = "^0.18.8"
@@ -19,6 +18,7 @@ pillow = "^10.3.0"
 requests = "^2.31.0"
 waitress = "^3.0.0"
 xlsxwriter = "^3.2.0"
+sqlalchemy = "^2.0.30"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -38,13 +38,14 @@ profile = "black"
 
 [tool.black]
 line_length = 120
-exclude = "wfastcgi.py"
+exclude = "wfastcgi.py,__init__.py"
 
 
 [tool.mypy]
 ignore_missing_imports = true
-exclude = ["wfastcgi.py"]
+no_implicit_optional = false
+exclude = ["wfastcgi.py","__init__.py"]
 
 
 [tool.ruff]
-exclude = ["wfastcgi.py"]
+exclude = ["wfastcgi.py","__init__.py"]
