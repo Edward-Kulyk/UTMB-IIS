@@ -44,8 +44,10 @@ exclude = "wfastcgi.py,__init__.py"
 [tool.mypy]
 ignore_missing_imports = true
 no_implicit_optional = false
-exclude = ["wfastcgi.py","__init__.py"]
-
+exclude = '''
+    ^wfastcgi\.py
+    ^__init__\.py
+'''
 
 [tool.ruff]
 exclude = ["wfastcgi.py","__init__.py"]
