@@ -1,22 +1,31 @@
-
+/* Основные стили для заголовков */
 h1 {
   color: #004a7c;
   text-align: center;
   margin: 20px 0;
 }
 
+h2 {
+  color: #333;
+  font-size: 18px;
+  margin: auto;
+  text-align: center;
+}
+
+/* Контейнер для таблицы */
 .table-container {
   background-color: #fff;
   margin: 20px auto;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width:80%;
-  margin-top:0px;
+  width: 80%;
+  margin-top: 0px;
   overflow-x: auto;
   max-width: 80%;
 }
 
+/* Кнопка копирования */
 .copy-btn {
   display: block;
   margin: 10px auto;
@@ -32,33 +41,27 @@ h1 {
   background-color: #00397a;
 }
 
-/* Стили для кнопок внутри ячейки */
+/* Стили для кнопок редактирования и удаления */
 .edit-btn, .delete-btn {
   border: solid 0.5px black;
-  border-radius: 4px; /* Скругляем углы рамки */
-  padding: 5px 10px; /* Добавляем отступы внутри кнопок */
-  background-color: #fff; /* Фон кнопки */
-  color: #333; /* Цвет текста кнопки */
-  text-decoration: none; /* Убираем подчеркивание текста, если это ссылки */
+  border-radius: 4px;
+  padding: 5px 10px;
+  background-color: #fff;
+  color: #333;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .edit-btn:hover, .delete-btn:hover {
-  border-color: #004a7c; /* Цвет рамки при наведении */
+  border-color: #004a7c;
 }
 
-h2 {
-  color: #333;
-  font-size: 18px;
-  margin: auto;
-  text-align: center;
-}
-
+/* Таблица */
 table {
   border-collapse: collapse;
   margin-top: 20px;
   margin: auto;
-  width:100%
+  width: 100%;
 }
 
 table thead {
@@ -93,38 +96,40 @@ table tbody tr:nth-child(even) {
   font-weight: bold;
 }
 
+/* Заголовок таблицы */
 .table_title {
   display: flex;
-  justify-content: space-between; /* Равномерное распределение свободного пространства */
-  align-items: center; /* Выравнивание по центру по вертикали */
+  justify-content: space-between;
+  align-items: center;
   padding: 10px;
   padding-bottom: 0px;
   margin-bottom: -10px;
-  width:70%;
-  margin:auto;
+  width: 70%;
+  margin: auto;
 }
 
 .copy-btn {
-padding: 10px 20px;
-background-color: #0056b3;
-color: #fff;
-border: none;
-border-radius: 4px;
-cursor: pointer;
-margin-right: auto; /* Автоматический отступ слева для выравнивания по правому краю */
+  padding: 10px 20px;
+  background-color: #0056b3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: auto;
 }
 
 .copy-btn:hover {
-background-color: #00397a;
+  background-color: #00397a;
 }
 
 h2 {
-flex: 1; /* Заголовок займет все доступное пространство */
-text-align: center;
-color: #333;
-font-size: 18px;
+  flex: 1;
+  text-align: center;
+  color: #333;
+  font-size: 18px;
 }
 
+/* Скрытые элементы */
 .hidden {
   display: none;
 }
@@ -134,10 +139,10 @@ font-size: 18px;
   transition: all 0.3s ease;
 }
 
-/* Для анимированного появления можно использовать opacity */
+/* Плавное появление */
 .fade-in {
   opacity: 0;
-  animation: fadeInAnimation 0.5s forwards; /* forwards сохраняет конечное состояние анимации */
+  animation: fadeInAnimation 0.5s forwards;
 }
 
 @keyframes fadeInAnimation {
@@ -145,43 +150,80 @@ font-size: 18px;
     opacity: 1;
   }
 }
+
+/* Кнопка переключения деталей */
 .toggle-details-btn {
-  background: none; /* Убираем фон */
-  border: none; /* Убираем границу */
-  cursor: pointer; /* Курсор в виде руки, подсказывающий, что это кнопка */
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .toggle-details-btn img {
-  width: 20px; /* Или другой размер, который тебе нужен */
-  height: auto; /* Для сохранения пропорций изображения */
+  width: 20px;
+  height: auto;
   filter: grayscale(100%);
 }
-.actions-cell{
-    width:100px;
+
+.actions-cell {
+  width: 100px;
 }
 
-.short-url{
-    max-width:300px;
-    text-wrap: wrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+/* Короткие ссылки */
+.short-url {
+  max-width: 300px;
+  text-wrap: wrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.table-hidden{
-    display:none;
-    background-color:white;
+/* Скрытая таблица */
+.table-hidden {
+  display: none;
+  background-color: white;
 }
 
 .toggle-visibility-btn-table img {
-  width: 20px; /* Или другой размер, который тебе нужен */
-  height: auto; /* Для сохранения пропорций изображения */
+  width: 20px;
+  height: auto;
   filter: grayscale(100%);
 }
 
-label{
-    color : black;
+label {
+  color: black;
 }
 
-.campaign-graph{
-    max-height :600px;
+.campaign-graph {
+  max-height: 600px;
+}
+
+/* Стили для вкладок кампаний */
+.campaign-tabs {
+  display: flex;
+  flex-direction: column;
+  margin-right: 20px;
+}
+
+.campaign-tabs ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.campaign-tabs li {
+  padding: 10px;
+  background-color: #0056b3;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 5px;
+}
+
+.campaign-tabs li:hover {
+  background-color: #00397a;
+}
+
+.campaign-contents {
+  display: flex;
+  align-items: flex-start;
+  width: calc(100% - 200px); /* Ширина контейнера минус ширина вкладок */
 }

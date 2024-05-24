@@ -12,7 +12,7 @@
     <label for="campaign_name_query">Campaign Name:</label>
     <select name="campaign_name_query" id="campaign_name_query" required>
         {% for name in campaign_names %}
-            <option value="{{ name }}">{{ name }}</option>
+            <option value="{{ name.campaign_name }}">{{ name.campaign_name }}</option>
         {% endfor %}
     </select>
     <input type="submit" value="Get excel report">
