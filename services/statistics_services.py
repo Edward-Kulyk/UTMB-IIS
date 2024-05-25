@@ -16,13 +16,13 @@ from crud import (
     get_ga_data_other,
     get_graph_data,
 )
-from database import get_db
+from database import get_session
 
 
 def campaign_list(list_type: bool = None) -> list[dict[str, Any]]:
     campaigns_data = []
-    with get_db() as db:
-        campaigns = get_campaign_list(db, list_type)
+    with get_session() as session:
+        campaigns = get_campaign_list(session, list_type)
     for campaign in campaigns:
         campaign_data = {
             "campaign_id": campaign.id,
@@ -38,11 +38,11 @@ def campaign_list(list_type: bool = None) -> list[dict[str, Any]]:
 
 def campaign_info(campaign_id: int) -> Sequence[Any]:
     links_data: List[dict] = []
-    with get_db() as db:
-        campaign = get_campaign_by_id(db, campaign_id)
+    with get_session() as session:
+        campaign = get_campaign_by_id(session, campaign_id)
         if not campaign:
             return links_data
-        links = get_campaign_links(db, campaign.name)
+        links = get_campaign_links(session, campaign.name)
         if not links:
             return links_data
 
@@ -55,25 +55,33 @@ def campaign_info(campaign_id: int) -> Sequence[Any]:
                 "campaign_medium": link.campaign_medium,
                 "short_id": link.short_id,
                 "short_secure_url": link.short_secure_url,
-                "clicks_total": get_click_count(db, link.id),
+                "clicks_total": get_click_count(session, link.id),
                 "clicks_1d": (
-                    get_click_count(db, link.id, campaign.start_date, campaign.start_date) if campaign.start_date else 0
+                    get_click_count(session, link.id, campaign.start_date, campaign.start_date)
+                    if campaign.start_date
+                    else 0
                 ),
                 "clicks_7d": (
-                    get_click_count(db, link.id, campaign.start_date, campaign.start_date + timedelta(days=7))
+                    get_click_count(session, link.id, campaign.start_date, campaign.start_date + timedelta(days=7))
                     if campaign.start_date
                     else 0
                 ),
                 "clicks_14d": (
                     get_click_count(
-                        db, link.id, campaign.start_date + timedelta(days=7), campaign.start_date + timedelta(days=14)
+                        session,
+                        link.id,
+                        campaign.start_date + timedelta(days=7),
+                        campaign.start_date + timedelta(days=14),
                     )
                     if campaign.start_date
                     else 0
                 ),
                 "clicks_21d": (
                     get_click_count(
-                        db, link.id, campaign.start_date + timedelta(days=14), campaign.start_date + timedelta(days=21)
+                        session,
+                        link.id,
+                        campaign.start_date + timedelta(days=14),
+                        campaign.start_date + timedelta(days=21),
                     )
                     if campaign.start_date
                     else 0
@@ -105,8 +113,8 @@ def ga_data_format(
         "bounce_rate": "0%",
     }
 
-    with get_db() as db:
-        ga_result = get_ga_data(db, url, f"{campaign_source} / {campaign_medium}", campaign_content)
+    with get_session() as session:
+        ga_result = get_ga_data(session, url, f"{campaign_source} / {campaign_medium}", campaign_content)
 
     if ga_result:
         session_duration = (
@@ -122,8 +130,8 @@ def ga_data_format(
 
 
 def get_ga_data_other_list(url: Column[str] | str, source_medium: list, campaign_content: list) -> List[Any]:
-    with get_db() as db:
-        ga_result = get_ga_data_other(db, url, source_medium, campaign_content)
+    with get_session() as session:
+        ga_result = get_ga_data_other(session, url, source_medium, campaign_content)
 
     ga_info_list = []
     for row in ga_result:
@@ -148,10 +156,10 @@ def get_ga_data_other_list(url: Column[str] | str, source_medium: list, campaign
 
 
 def campaign_graph(campaign_id: int) -> dict:
-    with get_db() as db:
-        campaign = get_campaign_by_id(db, campaign_id)
+    with get_session() as session:
+        campaign = get_campaign_by_id(session, campaign_id)
         if campaign is not None:
-            data = get_graph_data(db, campaign.name)
+            data = get_graph_data(session, campaign.name)
     graph_data: dict = defaultdict(lambda: defaultdict(dict))
     for record in data:
         source_medium, date_str = record[0], record[1].isoformat()
@@ -211,8 +219,8 @@ def generate_campaign_excel(output: BytesIO, campaign_id: int):
 
 
 def filtered_statistic(form_data: dict) -> list:
-    with get_db() as db:
-        links = get_filtered_links(db, form_data)
+    with get_session() as session:
+        links = get_filtered_links(session, form_data)
 
         links_data = []
         for link in links:
@@ -223,7 +231,7 @@ def filtered_statistic(form_data: dict) -> list:
                 "campaign_medium": link.campaign_medium,
                 "short_id": link.short_id,
                 "short_secure_url": link.short_secure_url,
-                "clicks": get_click_count(db, link.id, form_data["date_from"], form_data["date_to"]),
+                "clicks": get_click_count(session, link.id, form_data["date_from"], form_data["date_to"]),
             }
             if None not in (link.url, link.campaign_source, link.campaign_medium, link.campaign_content):
                 link_info.update(
