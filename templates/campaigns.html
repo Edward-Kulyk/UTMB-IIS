@@ -24,7 +24,7 @@
         <!-- Здесь будут отображаться данные выбранной кампании -->
     </div>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
     // Обработчик нажатия на вкладку кампании
@@ -33,7 +33,7 @@ $(document).ready(function() {
         console.log("request send")
         // Отправка AJAX-запроса на сервер для получения данных о кампании
         $.ajax({
-            url: '/campaigns/api/' + campaignId,
+            url: '/campaigns/api/table/' + campaignId,
             method: 'GET',
             success: function(data) {
                 // Обновление содержимого кампании

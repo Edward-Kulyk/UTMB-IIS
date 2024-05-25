@@ -8,18 +8,18 @@ from sqlalchemy.sql.functions import concat
 from models import Campaign, ClicksDate, GoogleAnalyticsDataGraph, GoogleAnalyticsDataTable, UTMLink
 
 
-def get_campaign_by_id(db: Session, campaign_id: Column[int] | int) -> Campaign | None:
+def get_campaign_by_id(session: Session, campaign_id: Column[int] | int) -> Campaign | None:
     stmt = select(Campaign).where(Campaign.id == campaign_id)
-    return db.execute(stmt).scalar_one_or_none()
+    return session.execute(stmt).scalar_one_or_none()
 
 
-def get_campaign_links(db: Session, campaign_name: Column[str] | str) -> List[UTMLink] | Sequence[Any]:
+def get_campaign_links(session: Session, campaign_name: Column[str] | str) -> List[UTMLink] | Sequence[Any]:
     stmt: Select = select(UTMLink).where(UTMLink.campaign_name.is_(campaign_name))
-    return db.execute(stmt).scalars().all()
+    return session.execute(stmt).scalars().all()
 
 
 def get_click_count(
-    db: Session,
+    session: Session,
     link_id: Column[int] | int,
     start_date: Optional[ColumnElement[date] | date] = None,
     end_date: Optional[ColumnElement[date] | None] = None,
@@ -31,11 +31,11 @@ def get_click_count(
     elif start_date:
         stmt = stmt.where(ClicksDate.date == start_date)
 
-    return db.execute(stmt).scalar() or 0
+    return session.execute(stmt).scalar() or 0
 
 
 def get_ga_data(
-    db: Session, url: Column[str] | str, source_medium: Column[str] | str, content: Column[str] | str
+    session: Session, url: Column[str] | str, source_medium: Column[str] | str, content: Column[str] | str
 ) -> Row[tuple[int, int, int, float]] | None:
     ga_data = (
         select(
@@ -49,13 +49,13 @@ def get_ga_data(
         .where(GoogleAnalyticsDataTable.content == content)
     )
 
-    ga_result = db.execute(ga_data).one_or_none()
+    ga_result = session.execute(ga_data).one_or_none()
 
     return ga_result
 
 
 def get_ga_data_other(
-    db: Session, url: Column[str] | str, source_medium: list, content: list
+    session: Session, url: Column[str] | str, source_medium: list, content: list
 ) -> Sequence[Row[tuple[str, str, int, int, int, float]]]:
     ga_data = (
         select(
@@ -71,12 +71,12 @@ def get_ga_data_other(
         .where(GoogleAnalyticsDataTable.content.notin_(content))
     )
 
-    ga_result = db.execute(ga_data).all()
+    ga_result = session.execute(ga_data).all()
 
     return ga_result
 
 
-def get_graph_data(db: Session, campaign_name: Column[str] | str) -> Sequence[Row[Any]]:
+def get_graph_data(session: Session, campaign_name: Column[str] | str) -> Sequence[Row[Any]]:
     sub_query = (
         select(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url)
         .select_from(UTMLink)
@@ -116,23 +116,23 @@ def get_graph_data(db: Session, campaign_name: Column[str] | str) -> Sequence[Ro
         .group_by(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url, ClicksDate.date)
         .order_by(UTMLink.campaign_source, UTMLink.campaign_medium, ClicksDate.date)
     )
-    return db.execute(stmt).all()
+    return session.execute(stmt).all()
 
 
-def get_link(db: Session, link_id: Column[int] | int) -> UTMLink | None:
+def get_link(session: Session, link_id: Column[int] | int) -> UTMLink | None:
     stmt = select(UTMLink).where(UTMLink.id == link_id)
-    return db.execute(stmt).scalar_one_or_none()
+    return session.execute(stmt).scalar_one_or_none()
 
 
-def insert_or_update_data(db: Session, model: Any, filters: Dict[str, Any], data: Dict[str, Any]) -> None:
-    existing_record = db.execute(select(model).filter_by(**filters)).scalar_one_or_none()
+def insert_or_update_data(session: Session, model: Any, filters: Dict[str, Any], data: Dict[str, Any]) -> None:
+    existing_record = session.execute(select(model).filter_by(**filters)).scalar_one_or_none()
     if existing_record:
-        db.execute(update(model).where(model.id == existing_record.id).values(**data))
+        session.execute(update(model).where(model.id == existing_record.id).values(**data))
     else:
-        db.execute(insert(model).values(**data))
+        session.execute(insert(model).values(**data))
 
 
-def get_filtered_links(db: Session, form_data) -> Sequence[UTMLink]:
+def get_filtered_links(session: Session, form_data) -> Sequence[UTMLink]:
     stmt = select(UTMLink)
     filters = []
     # Создаем список фильтров, используя getlist для извлечения данных из формы
@@ -151,5 +151,5 @@ def get_filtered_links(db: Session, form_data) -> Sequence[UTMLink]:
     for filter_condition in filters:
         stmt = stmt.where(filter_condition)
 
-    links = db.execute(stmt).scalars().all()
+    links = session.execute(stmt).scalars().all()
     return links

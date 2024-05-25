@@ -5,7 +5,7 @@ from flask import jsonify
 from sqlalchemy import Column, select
 
 from crud import campaign_add, delete_link_db, get_default_values, update_link_db, utm_add_link, utm_check_exist
-from database import get_db
+from database import get_session
 from models import Campaign, UTMLink
 from utils import create_short_link, delete_link_shot_io
 
@@ -29,7 +29,7 @@ def create_link(form_data: dict) -> tuple[str, Column[str]] | tuple[str, str]:
         slug=slug,
     )
 
-    with get_db() as session:
+    with get_session() as session:
         if utm_check_exist(session, new_link):
             error_message = "Link already exists"
             return error_message, ""
@@ -52,7 +52,7 @@ def create_link(form_data: dict) -> tuple[str, Column[str]] | tuple[str, str]:
 
     short_secure_url = new_link.short_secure_url
 
-    with get_db() as session:
+    with get_session() as session:
         utm_add_link(session, new_link)
 
     return "", short_secure_url
@@ -76,20 +76,20 @@ def create_campaign(form_data) -> None:
         start_date=start_date,
         hide=False,  # Assuming hide is a boolean field
     )
-    with get_db() as db:
-        campaign_add(db, new_campaign)
+    with get_session() as session:
+        campaign_add(session, new_campaign)
 
 
 def update_link(link_id: int, data: dict) -> Any | None:
     if link_id and data is not None:
-        with get_db() as db:
-            return update_link_db(db, link_id, data)
+        with get_session() as session:
+            return update_link_db(session, link_id, data)
     return {"status": "error", "message": "Record not found"}
 
 
 def delete_link(short_link_id: str):
-    with get_db() as db:
-        result = delete_link_db(db, short_link_id)
+    with get_session() as session:
+        result = delete_link_db(session, short_link_id)
         if result == "Link not found":
             return jsonify({"status": "failure", "message": "Link not found"}), 404
 
@@ -98,8 +98,8 @@ def delete_link(short_link_id: str):
 
 
 def get_default_values_service(campaign_name: str) -> dict:
-    with get_db() as db:
-        campaign = get_default_values(db, campaign_name)
+    with get_session() as session:
+        campaign = get_default_values(session, campaign_name)
         if campaign:
             return {"url_by_default": campaign.url_by_default, "domain_by_default": campaign.domain_by_default}
         else:
@@ -107,7 +107,7 @@ def get_default_values_service(campaign_name: str) -> dict:
 
 
 def edit_campaign_row(campaign_id: int, data: Dict[str, str]) -> tuple[bool, str]:
-    with get_db() as db:
+    with get_session() as session:
         start_date_str = data.get("start_date")
         if start_date_str is not None:
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
@@ -116,7 +116,7 @@ def edit_campaign_row(campaign_id: int, data: Dict[str, str]) -> tuple[bool, str
         hide = False if data["hide"].lower() == "false" else True
 
         stmt = select(Campaign).where(Campaign.id == campaign_id)
-        campaign = db.execute(stmt).first()
+        campaign = session.execute(stmt).first()
 
         if not campaign:
             return False, "campaign not found"
@@ -126,5 +126,5 @@ def edit_campaign_row(campaign_id: int, data: Dict[str, str]) -> tuple[bool, str
         campaign.start_date = start_date
         campaign.hide = hide
 
-        db.commit()
+        session.commit()
         return True, "Row updated successfully"

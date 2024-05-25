@@ -7,7 +7,7 @@ import requests
 from config import Config
 from crud import get_clicks_date, get_link, get_utm_links
 from crud.link_crud import add_clicks_date, update_clicks_date
-from database import get_db
+from database import get_session
 
 
 def create_short_link(domain, slug, long_url):
@@ -26,8 +26,8 @@ def create_short_link(domain, slug, long_url):
 
 
 def update_clicks_count():
-    with get_db() as db:
-        utm_links = get_utm_links(db)
+    with get_session() as session:
+        utm_links = get_utm_links(session)
         current_date = datetime.now().date() + timedelta(days=1)
 
         for utm_link in utm_links:
@@ -41,7 +41,7 @@ def update_clicks_count():
 
 
 def process_clicks_data(utm_link_id, click_data):
-    with get_db() as db:
+    with get_session() as session:
         if "clickStatistics" in click_data:
             datasets = click_data["clickStatistics"].get("datasets", [])
             for dataset in datasets:
@@ -50,14 +50,14 @@ def process_clicks_data(utm_link_id, click_data):
                     click_date = datetime.strptime(click["x"], "%Y-%m-%dT%H:%M:%S.%fZ").date()
                     new_clicks_count = int(click["y"])
 
-                    link_click_date = get_clicks_date(db, utm_link_id, click_date)
+                    link_click_date = get_clicks_date(session, utm_link_id, click_date)
 
                     if link_click_date:
                         if new_clicks_count > link_click_date.clicks_count:
-                            update_clicks_date(db, link_click_date, new_clicks_count)
+                            update_clicks_date(session, link_click_date, new_clicks_count)
                             print("Обновились")
                     else:
-                        add_clicks_date(db, utm_link_id, click_date, new_clicks_count)
+                        add_clicks_date(session, utm_link_id, click_date, new_clicks_count)
                         print("добавились")
 
 
@@ -95,8 +95,8 @@ def get_clicks_total(short_id):
 
 
 def edit_link(link_id: int):
-    with get_db() as db:
-        record = get_link(db, link_id)
+    with get_session() as session:
+        record = get_link(session, link_id)
     if record is None:
         return
     url = f"https://api.short.io/links/{record.short_id}"

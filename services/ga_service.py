@@ -7,7 +7,7 @@ from google.auth import credentials, load_credentials_from_file
 
 from config import Config
 from crud import get_campaign_list, insert_or_update_data
-from database import get_db
+from database import get_session
 from models import Campaign, GoogleAnalyticsDataGraph, GoogleAnalyticsDataTable
 from utils.ga4_requests import build_analytics_request_graph, build_analytics_request_table
 
@@ -25,8 +25,8 @@ def analytics_data() -> None:
     ga_credentials = get_service_account_credentials()
     client = get_analytics_client(ga_credentials)
 
-    with get_db() as db:
-        campaigns = get_campaign_list(db, False)
+    with get_session() as session:
+        campaigns = get_campaign_list(session, False)
 
         for campaign in campaigns:
             for property_id in Config.PROPERTY_IDS:
@@ -46,8 +46,8 @@ def analytics_data() -> None:
                         "url": data["url"],
                         "date": data["date"].date(),
                     }
-                    insert_or_update_data(db, GoogleAnalyticsDataGraph, filters, data)
-                db.commit()
+                    insert_or_update_data(session, GoogleAnalyticsDataGraph, filters, data)
+                session.commit()
 
                 request_table = build_analytics_request_table(property_id, path, start_date, end_date)
                 response_table = client.run_report(request_table)
@@ -59,8 +59,8 @@ def analytics_data() -> None:
                         "url": data["url"],
                         "content": data["content"],
                     }
-                    insert_or_update_data(db, GoogleAnalyticsDataTable, filters, data)
-                db.commit()
+                    insert_or_update_data(session, GoogleAnalyticsDataTable, filters, data)
+                session.commit()
 
 
 def process_response_graph(response: RunReportResponse, campaign: Campaign) -> List[Dict[str, Any]]:

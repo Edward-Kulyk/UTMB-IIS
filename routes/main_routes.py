@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect
 
-from database import get_db
+from database import get_session
 from services import update_bloggers_avg
 
 main = Blueprint(
@@ -8,7 +8,7 @@ main = Blueprint(
     __name__,
 )
 
-db = get_db()
+db = get_session()
 
 
 @main.route("/update-clicks", methods=["GET"])

@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from sqlalchemy import select
 
 from config import Config
-from database import get_db
+from database import get_session
 from models import Blogger
 
 
@@ -54,9 +54,9 @@ def get_and_save_channel_id(api_key, username, name):
 
     # Сохраняем информацию о блогере в базу данных
     blogger = Blogger(name=name, yt_channel_id=channel_id)
-    with get_db() as db:
-        db.add(blogger)
-        db.session.commit()
+    with get_session() as session:
+        session.add(blogger)
+        session.session.commit()
 
     return channel_id
 
@@ -79,12 +79,12 @@ def extract_username_from_url(channel_url):
 
 
 def update_bloggers_avg():
-    with get_db() as db:
-        bloggers = db.execute(select(Blogger)).scalars().all()
+    with get_session() as session:
+        bloggers = session.execute(select(Blogger)).scalars().all()
         for blogger in bloggers:
             avg_views = get_channel_video_views(Config.api_key, blogger.yt_channel_id)
             blogger.yt_avg = avg_views
-        db.commit()
+        session.commit()
 
 
 def add_date_stamp_to_image(photo_stream, date_str, font_path="arial.ttf"):
@@ -116,6 +116,6 @@ def add_date_stamp_to_image(photo_stream, date_str, font_path="arial.ttf"):
 
 
 def get_bloggers():
-    with get_db() as db:
+    with get_session() as session:
         stmt = select(Blogger)
-        return db.execute(stmt).scalars().all()
+        return session.execute(stmt).scalars().all()
