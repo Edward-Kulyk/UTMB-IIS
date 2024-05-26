@@ -8,15 +8,21 @@
 {% endblock %}
 
 {% block content %}
+<div class="campaign-tabs-wrapper">
 <h1>Campaigns Overview</h1>
+    <div class="campaign-tabs-statistics">
 <div class="campaign-tabs">
     <ul>
         {% for campaign in campaign_list %}
         <li class="campaign-tab" data-campaign-id="{{ campaign.campaign_id }}">
-            {{ campaign.campaign_name }} - Launch Date: {{ campaign.campaign_start_date }}
+            {{ campaign.campaign_name }}
+<!--            <p>{{ campaign.campaign_start_date }}</p>-->
         </li>
         {% endfor %}
     </ul>
+</div>
+        <div class="graph"></div>
+    </div>
 </div>
 
 <div class="campaign-contents">

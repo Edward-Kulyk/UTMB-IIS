@@ -8,6 +8,7 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+<div class="wrapper">
     <div class="sidebar">
         <a href="{{ url_for('link_blueprint.link_creation') }}">
             <img class="icon" src="{{ url_for('static', filename='/images/sidebar/home.svg') }}" alt="Home icon">
@@ -48,10 +49,9 @@
     </div>
 
     <div class="content">
-
-    </div>
-
     {% block content %}{% endblock %}
+    </div>
+</div>
 
 
 

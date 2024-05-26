@@ -73,5 +73,4 @@ def edit_row(campaign_id: int):
     success, message = edit_campaign_row(campaign_id, data)
     if success:
         return jsonify({"status": "success", "message": message})
-    else:
-        return jsonify({"status": "error", "message": message}), 404
+    return jsonify({"status": "error", "message": message}), 404

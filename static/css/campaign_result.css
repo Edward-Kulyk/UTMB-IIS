@@ -201,6 +201,8 @@ label {
   display: flex;
   flex-direction: column;
   margin-right: 20px;
+  width:fit-content;
+
 }
 
 .campaign-tabs ul {
@@ -227,3 +229,22 @@ label {
   align-items: flex-start;
   width: calc(100% - 200px); /* Ширина контейнера минус ширина вкладок */
 }
+
+
+
+.wrapper{
+display:flex;
+}
+.graph{
+border:1px solid black;
+display:block;
+}
+.graph{
+border: 1px solid black;
+    display: block;
+    width: 100%;
+    }
+    .campaign-tabs-statistics{
+    display:flex;
+    width:100%;
+    }
