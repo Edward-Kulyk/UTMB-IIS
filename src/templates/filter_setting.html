@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Filter settings {% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/filter_set.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Get filtered table</h1>
+{% if error_message %}
+    <div class="error-message">{{ error_message }}</div>
+{% endif %}
+    <div class="main-content">
+        <form method="post" action="/filter_setting">
+            <label for="url">URL</label>
+            <select id="url" name="url" multiple>
+                {% for url in campaign_url %}
+                    <option value="{{ url }}">{{ url }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="campaign_source">Sources</label>
+            <select id="campaign_source" name="campaign_source" multiple>
+                {% for source in campaign_source %}
+                    <option value="{{ source }}">{{ source }}</option>
+                {% endfor %}
+            </select>
+
+                <label for="campaign_medium">Mediums</label>
+                <select id="campaign_medium" name="campaign_medium" multiple>
+                    {% for medium in campaign_medium %}
+                        <option value="{{ medium }}">{{ medium }}</option>
+                    {% endfor %}
+                </select>
+
+            <label for="campaign_name">Campaign Name:</label>
+            <select name="campaign_name" id="campaign_name" multiple>
+                <option value="" disabled>Select Campaign Name</option>
+                {% for name in campaign_name %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="campaign_content">Contents</label>
+            <select id="campaign_content" name="campaign_content" multiple>
+                {% for content in campaign_content %}
+                    <option value="{{ content }}">{{ content }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="date_from">Start Date:</label>
+            <input type="date" id="date_from" name="date_from">
+
+            <label for="date_to">End date:</label>
+            <input type="date" id="date_to" name="date_to">
+
+            <h3>It may take a few minutes depending on the number of links.</h3>
+            <input id="submit" type="submit" value="Get report">
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                var date = new Date(); // Get current date
+
+                var dateString = date.toISOString().split('T')[0]; // Format date as "YYYY-MM-DD"
+                document.getElementById('date_to').value = dateString; // Set default date input value to today
+              });
+            </script>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/date-defaults.js') }}"></script>
+{% endblock %}

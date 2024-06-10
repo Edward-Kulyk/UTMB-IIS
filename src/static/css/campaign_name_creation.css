@@ -1,0 +1,58 @@
+form {
+  width: 40%; /* Форма будет на 40px меньше ширины экрана */
+  max-width: 1100px; /* Ограничим максимальную ширину, если экран очень широкий */
+  padding: 20px;
+  margin: 2vh auto; /* Небольшой вертикальный отступ и центрирование */
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background-color: #ffffff;
+  box-sizing: border-box; /* Чтобы padding не увеличивал общую ширину */
+  font-color: #5E6165;
+}
+
+
+h1 {
+  color: #004a7c;
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+label {
+    display: block;
+    margin-top: 20px;
+    color: #333;
+    margin-bottom: 9px;
+    margin-left: 15px;
+}
+
+input[type="text"], select {
+  box-sizing: border-box; /* включаем padding и border в общую ширину */
+  width: 100%; /* ширина относительно родительского элемента */
+  padding: 10px; /* внутренние отступы */
+  margin: 0 0 10px; /* отступ снизу */
+  border: 1px solid #ccc; /* стиль границы */
+  border-radius: 4px; /* Скругление углов кнопки */
+}
+
+input[type=submit] {
+  background-color: #004a7c; /* Темно-синий фон кнопки, как у хедера */
+  color: white; /* Белый текст кнопки */
+  padding: 10px 15px; /* Внутренний отступ для кнопки */
+  border: none; /* Убрать границу для кнопки */
+  border-radius: 4px; /* Скругление углов кнопки */
+  cursor: pointer; /* Курсор в виде указателя */
+  margin-top: 20px; /* Отступ сверху для кнопки */
+}
+
+input[type=submit]:hover {
+  background-color: #003366; /* Темнее синий фон для кнопки при наведении */
+}
+
+
+/* Стиль для полей ввода даты */
+.date-input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+}

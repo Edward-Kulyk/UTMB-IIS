@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns Overview{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/campaign_name_creation.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+    <h1>Add Campaign Name</h1>
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" class="form-control">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="start_date">Launch Date:</label>
+            <input type="date" id="start_date" name="start_date" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="url_by_default">URL by Default:</label>
+            <input type="text" id="url_by_default" name="url_by_default" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="domain_by_default">Domain by Default:</label>
+            <select id="domain_by_default" name="domain_by_default" class="form-control">
+                <option value="asus.click">asus.click</option>
+                <option value="rog.gg">rog.gg</option>
+            </select>
+        </div>
+
+        <input type="submit" value="Add campaign name">
+    </form>
+
+{% endblock %}

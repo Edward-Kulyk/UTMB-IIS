@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns Overview{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/campaign_name_overview.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<h1>Campaigns Overview</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>URL by Default</th>
+            <th>Domain by Default</th>
+            <th>Start Date</th>
+            <th>Hide</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for campaign in campaigns %}
+        <tr id="row-{{ campaign.campaign_id }}">
+            <td>{{ campaign.campaign_name }}</td>
+            <td>{{ campaign.campaign_url_by_default }}</td>
+            <td>{{ campaign.campaign_domain_by_default }}</td>
+            <td>
+                <input required type="date" id="date" name="date" class="date-input" value="{{ campaign.campaign_start_date }}">
+            </td>
+            <td><input type="checkbox" class="hide-checkbox" data-id="{{ campaign.campaign_id }}" {% if campaign.campaign_hide %}checked{% endif %}></td>
+            <td>
+                <button class="edit-btn" data-id="{{ campaign.campaign_id }}"><img src="static/images/edit.png" alt="Edit"></button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Ссылки на ваши изображения
+    const editIcon = '<img src="static/images/edit.png" alt="Edit">';
+    const saveIcon = '<img src="static/images/save.png" alt="Save">';
+
+    // Обработчик нажатия на кнопку сохранения изменений
+    document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const row = this.closest('tr');
+
+            if (row.classList.contains('editing')) {
+                // В режиме редактирования
+                const id = row.id.split('-')[1];
+                const data = {
+                    // Modify this part according to your needs
+                    name: row.cells[0].innerText,
+                    url_by_default: row.cells[1].innerText,
+                    domain_by_default: row.cells[2].innerText,
+                    start_date: row.cells[3].querySelector('input').value,
+                    hide: row.querySelector('.hide-checkbox').checked ? 'true' : 'false'
+                };
+
+                const confirmSave = confirm("Save changes?");
+                if (confirmSave) {
+                    fetch(`/edit-campaign-row/${id}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        alert(result.message);
+                        if (result.status === 'success') {
+                            Array.from(row.cells).forEach(cell => cell.contentEditable = false);
+                            row.classList.remove('editing');
+                            button.innerHTML = editIcon; // Вернуть значок редактирования
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            } else {
+                // Вход в режим редактирования
+                Array.from(row.cells).forEach((cell, index) => {
+                    if (index < row.cells.length - 3) {
+                        cell.dataset.originalValue = cell.innerText;
+                        cell.contentEditable = true;
+                    }
+                });
+                row.classList.add('editing');
+                this.innerHTML = saveIcon; // Задать значок сохранения
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

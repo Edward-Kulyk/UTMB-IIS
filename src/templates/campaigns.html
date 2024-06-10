@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns Overview{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/campaign_result.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="campaign-tabs-wrapper">
+<h1>Campaigns Overview</h1>
+    <div class="campaign-tabs-statistics">
+<div class="campaign-tabs">
+    <ul>
+        {% for campaign in campaign_list %}
+        <li class="campaign-tab" data-campaign-id="{{ campaign.campaign_id }}">
+            {{ campaign.campaign_name }}
+<!--            <p>{{ campaign.campaign_start_date }}</p>-->
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+        <div class="graph"></div>
+    </div>
+</div>
+
+<div class="campaign-contents">
+    <div id="campaign-content">
+        <!-- Здесь будут отображаться данные выбранной кампании -->
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Обработчик нажатия на вкладку кампании
+    $('.campaign-tab').on('click', function() {
+        var campaignId = $(this).data('campaign-id');
+        console.log("request send")
+        // Отправка AJAX-запроса на сервер для получения данных о кампании
+        $.ajax({
+            url: '/campaigns/api/table/' + campaignId,
+            method: 'GET',
+            success: function(data) {
+                // Обновление содержимого кампании
+                var contentHtml = '<h2>' + data.campaign_name + ' - [Launch Date: ' + data.start_date + ']</h2>';
+                contentHtml += '<table>';
+                contentHtml += '<thead><tr>';
+                contentHtml += '<th>Short Secure URL</th>';
+                contentHtml += '<th>Campaign Content</th>';
+                contentHtml += '<th>Campaign Source</th>';
+                contentHtml += '<th>Campaign Medium</th>';
+                contentHtml += '<th>Clicks 24h</th>';
+                contentHtml += '<th>Clicks W1</th>';
+                contentHtml += '<th>Clicks W2</th>';
+                contentHtml += '<th>Clicks W3</th>';
+                contentHtml += '<th>Total Clicks</th>';
+                contentHtml += '<th>Users</th>';
+                contentHtml += '<th>Sessions</th>';
+                contentHtml += '<th>Avg session duration</th>';
+                contentHtml += '<th>Bounce rate</th>';
+                contentHtml += '</tr></thead>';
+                contentHtml += '<tbody>';
+
+                data.forEach(function(link) {
+                    contentHtml += '<tr>';
+                    contentHtml += '<td>' + link.short_secure_url + '</td>';
+                    contentHtml += '<td>' + link.campaign_content + '</td>';
+                    contentHtml += '<td>' + link.campaign_source + '</td>';
+                    contentHtml += '<td>' + link.campaign_medium + '</td>';
+                    contentHtml += '<td>' + link.clicks_1d + '</td>';
+                    contentHtml += '<td>' + link.clicks_7d + '</td>';
+                    contentHtml += '<td>' + link.clicks_14d + '</td>';
+                    contentHtml += '<td>' + link.clicks_21d + '</td>';
+                    contentHtml += '<td>' + link.clicks_total + '</td>';
+                    contentHtml += '<td>' + link.ga_active_users + '</td>';
+                    contentHtml += '<td>' + link.ga_sessions + '</td>';
+                    contentHtml += '<td>' + link.ga_average_session_duration + '</td>';
+                    contentHtml += '<td>' + link.bounce_rate + '</td>';
+                    contentHtml += '</tr>';
+                });
+
+                contentHtml += '</tbody></table>';
+                $('#campaign-content').html(contentHtml);
+            },
+            error: function(error) {
+                console.log('Ошибка при загрузке данных кампании:', error);
+            }
+        });
+    });
+
+
+});
+</script>
+{% endblock %}

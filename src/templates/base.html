@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>ASUS UTM builder</title>
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="wrapper">
+    <div class="sidebar">
+        <a href="{{ url_for('link_blueprint.link_creation') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/home.svg') }}" alt="Home icon">
+            <span class="link-text"> Home</span>
+        </a>
+        <a href="{{ url_for('campaign_blueprint.add_campaign')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/new_campaign.svg') }}" alt="Home icon">
+            <span class="link-text"> New campaign</span>
+        </a>
+        <a href="{{ url_for('campaign_blueprint.campaign_name_list')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/list.svg') }}" alt="Home icon">
+            <span class="link-text"> Campaign list</span>
+        </a>
+        <a href="{{ url_for('statistics_blueprint.campaigns_statistics') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/graph.svg') }}" alt="Home icon">
+            <span class="link-text"> Statistic</span>
+        </a>
+        <a href="{{ url_for('option.manage_exclusions') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/plus.svg') }}" alt="Home icon">
+            <span class="link-text"> Options </span>
+        </a>
+        <a href="{{ url_for('option.exclude_options') }}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/minus.svg') }}" alt="Home icon">
+            <span class="link-text"> Options </span>
+        </a>
+        <a href="{{ url_for('statistics_blueprint.filter_setting')}}">
+            <img class="icon" src="{{ url_for('static', filename='/images/sidebar/filter.svg') }}" alt="Home icon">
+            <span class="link-text">Filter(beta)</span>
+        </a>
+
+    </div>
+
+    <div class="content">
+    {% block content %}{% endblock %}
+    </div>
+</div>
+
+
+
+    {% block scripts %}
+    <script src="{{ url_for('static', filename='/js/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/script.js') }}"></script>
+    {% endblock %}
+</body>
+</html>

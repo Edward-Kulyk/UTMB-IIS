@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}UTM Link Builder{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/utm_creation.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="header-container">
+        <h1>UTM Link Builder</h1>
+        {% if error_message %}
+        <div class="error-message" style="color: red; font-weight: bold;">{{ error_message }}</div>
+        {% endif %}
+        <img src="{{ url_for('static', filename='images/utm.png') }}" alt="UTM Builder" class="utm-image">
+    </div>
+
+    <form method="post" action="/" oninput="updateUtmLink()">
+
+        <label for="campaign_name">Campaign Name:</label>
+        <select name="campaign_name" id="campaign_name" onchange="toggleOtherInput('campaign_name', 'campaign_name_other')" required>
+            <option value="" disabled selected>Select Campaign Name</option>
+            {% for name in campaign_name %}
+                <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+
+
+        <label for="url">URL:</label>
+        <select name="url" id="url" onchange="toggleOtherInput('url', 'url_other')" required>
+          <option value="" disabled selected>Select or Enter url</option>
+            {% for id in campaign_url %}
+                <option value="{{ id }}">{{ id }}</option>
+            {% endfor %}
+            <option value="other">Other</option>
+        </select>
+        <input type="text" name="url_other" id="url_other" placeholder="Enter new value" style="display: none;"><br>
+
+        <label for="campaign_source">Campaign Source:</label>
+        <select name="campaign_source" id="campaign_source" onchange="toggleOtherInput('campaign_source', 'campaign_source_other')" required>
+            <option value="" disabled selected>Select or Enter Campaign Source</option>
+            {% for source in campaign_source %}
+                <option value="{{ source }}">{{ source }}</option>
+            {% endfor %}
+            <option value="other">Other</option>
+        </select>
+        <input type="text" name="campaign_source_other" id="campaign_source_other" placeholder="Enter new value" style="display: none;"><br>
+
+        <label for="campaign_medium">Campaign Medium:</label>
+        <select name="campaign_medium" id="campaign_medium" onchange="toggleOtherInput('campaign_medium', 'campaign_medium_other')" required>
+            <option value="" disabled selected>Select or Enter Campaign Medium</option>
+            {% for medium in campaign_medium %}
+                <option value="{{ medium }}">{{ medium }}</option>
+            {% endfor %}
+            <option value="other">Other</option>
+        </select>
+        <input type="text" name="campaign_medium_other" id="campaign_medium_other" placeholder="Enter new value" style="display: none;"><br>
+
+        <label for="campaign_content">Campaign content:</label>
+        <select name="campaign_content" id="campaign_content" onchange="toggleOtherInput('campaign_content', 'campaign_content_other')"required>
+          <option value="" disabled selected>Select or Enter Campaign ID</option>
+            {% for id in campaign_content %}
+                <option value="{{ id }}">{{ id }}</option>
+            {% endfor %}
+            <option value="other">Other</option>
+        </select>
+        <input type="text" name="campaign_content_other" id="campaign_content_other" placeholder="Enter new value" style="display: none;"><br>
+
+        <label for="domain">Domain:</label>
+        <select name="domain" id="domain">
+            <option value="asus.click">asus.click</option>
+            <option value="rog.gg">rog.gg</option>
+        </select><br>
+
+        <label for="slug">Slug:</label>
+        <input type="text" name="slug" id="slug"><br>
+
+        <label>UTM Link:</label>
+        <span id="utm-link"></span><br>
+        <input type="submit" value="Generate UTM Link">
+
+        {% if short_url %}
+            <div id="copyButtonContainer">
+            <p>Generated Short Link: <a href="{{ short_url }}" target="_blank" id="shortLink">{{ short_url }}</a></p><span class="copy-button" id="copyButton" data-clipboard-target="#shortLink">
+                <img width="30px" src="{{ url_for('static', filename='images/copy.png') }}" alt="Copy">
+            </span>
+            </div>
+        {% endif %}
+
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}

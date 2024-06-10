@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Filter settings {% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/filter_result.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>Query Results</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Short Secure URLs</th>
+                <th>Campaign Contents</th>
+                <th>Campaign Sources</th>
+                <th>Campaign Mediums</th>
+                <th class="clicks-details hidden">Clicks</th>
+                <th class="clicks-details hidden">Users</th>
+                <th class="clicks-details hidden">Sessions</th>
+                <th class="clicks-details hidden">Bounce rate</th>
+                <th class="clicks-details hidden">Session duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for links_info in link_info %}
+                <tr id="row-{{ link_info.short_id }}" class="table-hidden">
+                    <td class="short-url">{{ links_info.short_secure_url }}</td>
+                    <td>{{ links_info.campaign_content }}</td>
+                    <td>{{ links_info.campaign_source }}</td>
+                    <td>{{ links_info.campaign_medium }}</td>
+                    <td class="clicks-details hidden">{{ links_info.clicks }}</td>
+                    <td class="clicks-details hidden">{{ links_info.ga_active_users }}</td>
+                    <td class="clicks-details hidden">{{ links_info.ga_sessions }}</td>
+                    <td class="clicks-details hidden">{{ links_info.bounce_rate }}</td>
+                    <td class="clicks-details hidden">{{ links_info.ga_average_session_duration }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
