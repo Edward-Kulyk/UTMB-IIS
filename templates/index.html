@@ -7,17 +7,18 @@
 {% block content %}
     <div class="header-container">
         <h1>UTM Link Builder</h1>
+        {% if error_message %}
+        <div class="error-message" style="color: red; font-weight: bold;">{{ error_message }}</div>
+        {% endif %}
         <img src="{{ url_for('static', filename='images/utm.png') }}" alt="UTM Builder" class="utm-image">
     </div>
-    {% if error_message %}
-        <div class="error-message" style="color: red; font-weight: bold;">{{ error_message }}</div>
-    {% endif %}
+
     <form method="post" action="/" oninput="updateUtmLink()">
 
         <label for="campaign_name">Campaign Name:</label>
         <select name="campaign_name" id="campaign_name" onchange="toggleOtherInput('campaign_name', 'campaign_name_other')" required>
             <option value="" disabled selected>Select Campaign Name</option>
-            {% for name in unique_campaign_names %}
+            {% for name in campaign_name %}
                 <option value="{{ name }}">{{ name }}</option>
             {% endfor %}
         </select>
@@ -26,7 +27,7 @@
         <label for="url">URL:</label>
         <select name="url" id="url" onchange="toggleOtherInput('url', 'url_other')" required>
           <option value="" disabled selected>Select or Enter url</option>
-            {% for id in unique_url %}
+            {% for id in campaign_url %}
                 <option value="{{ id }}">{{ id }}</option>
             {% endfor %}
             <option value="other">Other</option>
@@ -36,7 +37,7 @@
         <label for="campaign_source">Campaign Source:</label>
         <select name="campaign_source" id="campaign_source" onchange="toggleOtherInput('campaign_source', 'campaign_source_other')" required>
             <option value="" disabled selected>Select or Enter Campaign Source</option>
-            {% for source in unique_campaign_sources %}
+            {% for source in campaign_source %}
                 <option value="{{ source }}">{{ source }}</option>
             {% endfor %}
             <option value="other">Other</option>
@@ -46,7 +47,7 @@
         <label for="campaign_medium">Campaign Medium:</label>
         <select name="campaign_medium" id="campaign_medium" onchange="toggleOtherInput('campaign_medium', 'campaign_medium_other')" required>
             <option value="" disabled selected>Select or Enter Campaign Medium</option>
-            {% for medium in unique_campaign_mediums %}
+            {% for medium in campaign_medium %}
                 <option value="{{ medium }}">{{ medium }}</option>
             {% endfor %}
             <option value="other">Other</option>
@@ -56,7 +57,7 @@
         <label for="campaign_content">Campaign content:</label>
         <select name="campaign_content" id="campaign_content" onchange="toggleOtherInput('campaign_content', 'campaign_content_other')"required>
           <option value="" disabled selected>Select or Enter Campaign ID</option>
-            {% for id in unique_campaign_contents %}
+            {% for id in campaign_content %}
                 <option value="{{ id }}">{{ id }}</option>
             {% endfor %}
             <option value="other">Other</option>

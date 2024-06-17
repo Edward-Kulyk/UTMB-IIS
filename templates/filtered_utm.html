@@ -8,91 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Query Results</h1><!--
-    <div class="charts-container">
-        <div class="chart-container">
-            <canvas id="clicksChart"></canvas>
-        </div>
-
-        <script>
-
-                // Подготовка датасетов для Chart.js
-                var datasets = clicksData.map(function(source) {
-                    return {
-                        label: source['source-medium'], // Название линии
-                        data: source.data.map(function(item) { return item.clicks; }), // Количество кликов
-                        fill: false,
-                        borderColor: getRandomColor(), // Генерация случайного цвета для линии
-                        tension: 0.1
-                    };
-                });
-
-                // Получение всех уникальных дат из всех источников для оси X
-                var allDates = [];
-                clicksData.forEach(function(source) {
-                    source.data.forEach(function(item) {
-                        if (!allDates.includes(item.date)) {
-                            allDates.push(item.date);
-                        }
-                    });
-                });
-                allDates.sort(); // Сортировка дат
-
-                var ctx = document.getElementById('clicksChart').getContext('2d');
-                var chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: allDates, // Ось X использует все даты
-                        datasets: datasets
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Clicks' // Подпись оси Y
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Date' // Подпись оси X
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'right',
-                                labels: {
-                                    boxWidth: 20,
-                                    padding: 20
-                                }
-                            },
-                            tooltip: {
-                                enabled: true,
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: ${context.parsed.y}`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Функция для генерации случайного цвета
-                function getRandomColor() {
-                    var letters = '0123456789ABCDEF';
-                    var color = '#';
-                    for (var i = 0; i < 6; i++) {
-                        color += letters[Math.floor(Math.random() * 16)];
-                    }
-                    return color;
-                }
-        </script> -->
-    </div>
+    <h1>Query Results</h1>
 
     <table>
         <thead>
@@ -104,19 +20,22 @@
                 <th class="clicks-details hidden">Clicks</th>
                 <th class="clicks-details hidden">Users</th>
                 <th class="clicks-details hidden">Sessions</th>
-
+                <th class="clicks-details hidden">Bounce rate</th>
+                <th class="clicks-details hidden">Session duration</th>
             </tr>
         </thead>
         <tbody>
             {% for links_info in link_info %}
                 <tr id="row-{{ link_info.short_id }}" class="table-hidden">
-                    <td class="short-url">{{ links_info.url }}</td>
+                    <td class="short-url">{{ links_info.short_secure_url }}</td>
                     <td>{{ links_info.campaign_content }}</td>
                     <td>{{ links_info.campaign_source }}</td>
                     <td>{{ links_info.campaign_medium }}</td>
                     <td class="clicks-details hidden">{{ links_info.clicks }}</td>
-                    <td class="clicks-details hidden">{{ links_info.users }}</td>
-                    <td class="clicks-details hidden">{{ links_info.sessions }}</td>
+                    <td class="clicks-details hidden">{{ links_info.ga_active_users }}</td>
+                    <td class="clicks-details hidden">{{ links_info.ga_sessions }}</td>
+                    <td class="clicks-details hidden">{{ links_info.bounce_rate }}</td>
+                    <td class="clicks-details hidden">{{ links_info.ga_average_session_duration }}</td>
                 </tr>
             {% endfor %}
         </tbody>
