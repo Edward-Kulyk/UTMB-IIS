@@ -22,16 +22,16 @@
     </thead>
     <tbody>
         {% for campaign in campaigns %}
-        <tr id="row-{{ campaign.id }}">
-            <td>{{ campaign.name }}</td>
-            <td>{{ campaign.url_by_default }}</td>
-            <td>{{ campaign.domain_by_default }}</td>
+        <tr id="row-{{ campaign.campaign_id }}">
+            <td>{{ campaign.campaign_name }}</td>
+            <td>{{ campaign.campaign_url_by_default }}</td>
+            <td>{{ campaign.campaign_domain_by_default }}</td>
             <td>
-                <input required type="date" id="date" name="date" class="date-input" value="{{ campaign.start_date }}">
+                <input required type="date" id="date" name="date" class="date-input" value="{{ campaign.campaign_start_date }}">
             </td>
-            <td><input type="checkbox" class="hide-checkbox" data-id="{{ campaign.id }}" {% if campaign.hide %}checked{% endif %}></td>
+            <td><input type="checkbox" class="hide-checkbox" data-id="{{ campaign.campaign_id }}" {% if campaign.campaign_hide %}checked{% endif %}></td>
             <td>
-                <button class="edit-btn" data-id="{{ campaign.id }}"><img src="static/images/edit.png" alt="Edit"></button>
+                <button class="edit-btn" data-id="{{ campaign.campaign_id }}"><img src="static/images/edit.png" alt="Edit"></button>
             </td>
         </tr>
         {% endfor %}

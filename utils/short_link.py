@@ -3,11 +3,11 @@ import time
 from datetime import datetime, timedelta
 
 import requests
-from sqlalchemy import not_
 
-from app import db
 from config import Config
-from models import Campaign, ClicksDate, UTMLink
+from crud import get_clicks_date, get_link, get_utm_links
+from crud.link_crud import add_clicks_date, update_clicks_date
+from database import get_session
 
 
 def create_short_link(domain, slug, long_url):
@@ -22,59 +22,43 @@ def create_short_link(domain, slug, long_url):
         data = {"originalURL": long_url, "domain": domain, "path": slug, "title": "ACCZ | API Created"}
 
     response = requests.post(api_url, headers=headers, data=json.dumps(data))
-    print(long_url)
     return response.json()
 
 
 def update_clicks_count():
-    # Получаем ссылки и связанные кампании
-    utm_links = UTMLink.query.join(Campaign, UTMLink.campaign_name == Campaign.name).filter(not_(Campaign.hide)).all()
+    with get_session() as session:
+        utm_links = get_utm_links(session)
+        current_date = datetime.now().date() + timedelta(days=1)
 
-    current_date = datetime.utcnow().date() + timedelta(days=1)
+        for utm_link in utm_links:
+            date_diff = current_date - utm_link.campaign.start_date
 
-    for utm_link in utm_links:
-        # Рассчитываем разницу между текущей датой и датой начала кампании
-        date_diff = current_date - utm_link.campaign.start_date
+            if date_diff > timedelta(weeks=4):
+                continue
 
-        # Пропускаем итерацию цикла, если разница больше 28 дней
-        if date_diff > timedelta(weeks=4):
-            print(f"Пропускаем {utm_link.campaign_name}, так как разница между датами больше 4 недель.")
-            continue
-
-        print(utm_link.campaign_name)
-        response_data = get_clicks_filter(utm_link.short_id, utm_link.campaign.start_date, current_date)
-        process_clicks_data(utm_link.id, response_data)
+            response_data = get_clicks_filter(utm_link.short_id, utm_link.campaign.start_date, current_date)
+            process_clicks_data(utm_link.id, response_data)
 
 
 def process_clicks_data(utm_link_id, click_data):
-    if "clickStatistics" in click_data:
-        datasets = click_data["clickStatistics"].get("datasets", [])
-        for dataset in datasets:
-            data = dataset.get("data", [])
-            for click in data:
-                click_date = datetime.strptime(click["x"], "%Y-%m-%dT%H:%M:%S.%fZ").date()
-                new_clicks_count = int(click["y"])
+    with get_session() as session:
+        if "clickStatistics" in click_data:
+            datasets = click_data["clickStatistics"].get("datasets", [])
+            for dataset in datasets:
+                data = dataset.get("data", [])
+                for click in data:
+                    click_date = datetime.strptime(click["x"], "%Y-%m-%dT%H:%M:%S.%fZ").date()
+                    new_clicks_count = int(click["y"])
 
-                # Проверяем, существует ли запись для данной даты и ссылки
-                link_click_date = ClicksDate.query.filter_by(link_id=utm_link_id, date=click_date).first()
+                    link_click_date = get_clicks_date(session, utm_link_id, click_date)
 
-                if link_click_date:
-                    # Если запись существует и новое количество кликов больше или равно старому, обновляем количество кликов
-                    if new_clicks_count >= link_click_date.clicks_count:
-                        link_click_date.clicks_count = new_clicks_count
-                        print(f"Обновлено: {utm_link_id}, Дата: {click_date}, Клики: {new_clicks_count}")
+                    if link_click_date:
+                        if new_clicks_count > link_click_date.clicks_count:
+                            update_clicks_date(session, link_click_date, new_clicks_count)
+                            print("Обновились")
                     else:
-                        print(
-                            f"Пропущено (новое значение меньше старого): {utm_link_id}, Дата: {click_date}, Старое значение: {link_click_date.clicks_count}, Новое значение: {new_clicks_count}"
-                        )
-                else:
-                    # Если записи нет, создаем новую запись
-                    link_click_date = ClicksDate(link_id=utm_link_id, date=click_date, clicks_count=new_clicks_count)
-                    db.session.add(link_click_date)
-                    print(f"Создано: {utm_link_id}, Дата: {click_date}, Клики: {new_clicks_count}")
-
-        # Сохраняем изменения в базе данных
-        db.session.commit()
+                        add_clicks_date(session, utm_link_id, click_date, new_clicks_count)
+                        print("добавились")
 
 
 def get_clicks_filter(short_id, startDate, endDate):
@@ -85,7 +69,6 @@ def get_clicks_filter(short_id, startDate, endDate):
 
     for attempt in range(8):  # Попытаемся до 5 раз при ошибке 429
         response = requests.get(url, headers=headers, params=querystring)
-        print(response.json())
         if response.status_code == 429:
             time.sleep(2**attempt)  # Экспоненциальная задержка
         elif response.status_code == 200:
@@ -111,51 +94,11 @@ def get_clicks_total(short_id):
             return 0  # Возвращаем 0 при других ошибках
 
 
-def aggregate_clicks(short_ids, date_from, date_to):
-    # Initialize dictionaries to store clicks data
-    clicks_data = {}
-    clicks_by_line = {}
-    os_data_for_chart = {}
-
-    # Query clicks data from the database
-    clicks_query = (
-        db.session.query(ClicksDate.link_id, ClicksDate.date, ClicksDate.clicks_count)
-        .filter(ClicksDate.date.between(date_from, date_to))
-        .filter(ClicksDate.link_id.in_(short_ids))
-    )
-
-    # Group clicks data by link_id and date
-    clicks_results = clicks_query.all()
-
-    for link_id, click_date, click_count in clicks_results:
-        if link_id not in clicks_data:
-            clicks_data[link_id] = {}
-        clicks_data[link_id][click_date] = click_count
-
-    # Aggregate clicks by line (link_id)
-    for link_id, click_data in clicks_data.items():
-        clicks_by_line[link_id] = sum(click_data.values())
-
-    # # Get operating system data for each link from the database
-    # os_query = db.session.query(ClicksDate.link_id, ClicksDate.date, ClicksDate.operating_system) \
-    #     .filter(ClicksDate.date.between(date_from, date_to)) \
-    #     .filter(ClicksDate.link_id.in_(short_ids))
-    #
-    # os_results = os_query.all()
-    #
-    # # Group OS data by link_id and date
-    # for link_id, click_date, os in os_results:
-    #     if link_id not in os_data_for_chart:
-    #         os_data_for_chart[link_id] = {}
-    #     if click_date not in os_data_for_chart[link_id]:
-    #         os_data_for_chart[link_id][click_date] = {}
-    #     os_data_for_chart[link_id][click_date][os] = os_data_for_chart[link_id][click_date].get(os, 0) + 1
-
-    return clicks_data, clicks_by_line, os_data_for_chart
-
-
-def edit_link(id):
-    record = UTMLink.query.filter_by(id=id).first()
+def edit_link(link_id: int):
+    with get_session() as session:
+        record = get_link(session, link_id)
+    if record is None:
+        return
     url = f"https://api.short.io/links/{record.short_id}"
     payload = json.dumps(
         {
@@ -174,8 +117,8 @@ def edit_link(id):
     return response
 
 
-def delete_link(id):
-    url = f"https://api.short.io/links/{id}"
+def delete_link_shot_io(link_id: str):
+    url = f"https://api.short.io/links/{link_id}"
 
     headers = {"authorization": Config.SHORT_IO_API_KEY}
 

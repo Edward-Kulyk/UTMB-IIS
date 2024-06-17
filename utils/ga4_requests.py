@@ -1,15 +1,22 @@
+from datetime import date, datetime
+
 from google.analytics.data_v1beta.types import DateRange, Dimension, Filter, FilterExpression, Metric, RunReportRequest
+from sqlalchemy import ColumnElement
 
 
-def build_analytics_request_graph(property_id, url, start_date, end_date):
-    # Формируем базовый запрос к Google Analytics
+# noinspection PyTypeChecker
+def build_analytics_request_graph(
+    property_id: str | ColumnElement[str],
+    url: str | ColumnElement[str],
+    start_date: datetime | ColumnElement[date],
+    end_date: datetime | ColumnElement[date],
+) -> RunReportRequest:
     request = RunReportRequest(
         property=f"properties/{property_id}",
         dimensions=[
             Dimension(name="Date"),
             Dimension(name="sessionSourceMedium"),
             Dimension(name="landingPage"),
-            Dimension(name="sessionManualAdContent"),
         ],
         metrics=[
             Metric(name="activeUsers"),
@@ -28,8 +35,13 @@ def build_analytics_request_graph(property_id, url, start_date, end_date):
     return request
 
 
-def build_analytics_request_table(property_id, url, start_date, end_date):
-    # Формируем базовый запрос к Google Analytics
+# noinspection PyTypeChecker
+def build_analytics_request_table(
+    property_id: str | ColumnElement[str],
+    url: str | ColumnElement[str],
+    start_date: datetime | ColumnElement[date],
+    end_date: datetime | ColumnElement[date],
+) -> RunReportRequest:
     request = RunReportRequest(
         property=f"properties/{property_id}",
         dimensions=[
@@ -52,6 +64,6 @@ def build_analytics_request_table(property_id, url, start_date, end_date):
         ),
         order_bys=[{"metric": {"metric_name": "sessions"}, "desc": True}],
         metric_aggregations=["TOTAL"],
-        limit=30,
+        limit=50,
     )
     return request

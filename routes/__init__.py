@@ -1,3 +1,5 @@
+from .link_routes import link
 from .main_routes import main
-
-__all__ = ["main"]
+from .options_routes import options
+from .other_routes import other
+from .statistics_routes import statistics
