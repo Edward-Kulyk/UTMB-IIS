@@ -1,16 +1,17 @@
 from typing import Dict
-
-from config import Config
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, redirect
 from pydantic_core import ValidationError
 
+from config import Config
 from src.factories.utm_link_factory import UTMLinkFactory
 from src.forms.link_creation_form import LinkCreationForm
 from src.repositories.utm_link_repository import delete_link
 from src.services.campaign_service import edit_campaign_row
 from src.services.option_service import get_options_context
+from src.services.statistic_service import update_ga
 from src.services.utm_link_service import create_link
 from src.utils.extarnal_api.short_io import ShortLinkManager
+
 
 link = Blueprint(
     "link",
@@ -61,3 +62,9 @@ def edit_row(campaign_id: int):
 @link.route("/link/api/<string:short_link_id>", methods=["DELETE"])
 def delete_link_api(short_link_id: str):
     return delete_link(short_link_id)
+
+
+@link.route("/update_clicks", methods=["GET"])
+def update_info():
+    update_ga()
+    return redirect("/")

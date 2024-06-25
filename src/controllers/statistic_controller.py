@@ -19,12 +19,18 @@ def campaigns_statistics():
 
 @statistics_bp.route("/campaigns/api/table/<int:campaign_id>", methods=["GET"])
 def campaigns_data(campaign_id: int):
-    return campaign_info(campaign_id)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    print(f"Received start date: {start_date} and end date: {end_date,campaign_id}")
+    return campaign_info(campaign_id, start_date, end_date)
 
 
 @statistics_bp.route("/campaigns/api/graph/<int:campaign_id>", methods=["GET"])
 def campaigns_graph_info(campaign_id: int):
-    return campaign_graph(campaign_id)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    print(f"Received start date: {start_date} and end date: {end_date,campaign_id}")
+    return campaign_graph(campaign_id, start_date, end_date)
 
 
 @statistics_bp.route("/campaigns/api/query/<int:campaign_id>", methods=["GET"])

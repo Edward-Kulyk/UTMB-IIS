@@ -53,33 +53,14 @@ class ClicksDate(Base):
     link: Mapped["UTMLink"] = relationship("UTMLink", back_populates="clicks")
 
 
-class GoogleAnalyticsDataGraph(Base):
-    __tablename__ = "google_analytics_data_graph"
+class GoogleAnalyticsData(Base):
+    __tablename__ = "google_analytics_data"
     id: Mapped[intpk]
     date: Mapped[date] = mapped_column(Date, nullable=False)
     session_source_medium: Mapped[str255]
     url: Mapped[str255]
     active_users: Mapped[int] = mapped_column(Integer, nullable=False)
     sessions: Mapped[int] = mapped_column(Integer, nullable=False)
-
-
-class GoogleAnalyticsDataTable(Base):
-    __tablename__ = "google_analytics_data_table"
-    id: Mapped[intpk]
-    session_source_medium: Mapped[str255]
-    url: Mapped[str255]
-    active_users: Mapped[int]
-    sessions: Mapped[int]
-    average_session_duration: Mapped[int]
-    bounce_rate: Mapped[float]
-    content: Mapped[str255]
-
-
-class Blogger(Base):
-    __tablename__ = "blogger"
-    id: Mapped[intpk]
-    name: Mapped[str255] = mapped_column(String, nullable=False)
-    yt_channel_id: Mapped[Optional[str255]] = mapped_column(String, unique=True)
-    yt_avg: Mapped[int] = mapped_column(Integer, default=0)
-    ig_url: Mapped[str255]
-    ig_avg: Mapped[int] = mapped_column(Integer, default=0)
+    content: Mapped[str] = mapped_column(String)
+    bounce_rate: Mapped[int] = mapped_column(Integer)
+    average_session_duration: Mapped[int] = mapped_column(Integer)

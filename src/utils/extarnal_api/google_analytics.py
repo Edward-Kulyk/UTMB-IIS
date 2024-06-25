@@ -13,28 +13,19 @@ class GoogleAnalyticsService:
     def run_report(self, request):
         return self.client.run_report(request)
 
-    def process_response_graph(self, response: RunReportResponse, url: str) -> List[Dict[str, Any]]:
+    @staticmethod
+    def process_response(response: RunReportResponse, url: str) -> List[Dict[str, Any]]:
         return [
             {
+                "date": datetime.strptime(row.dimension_values[0].value, "%Y%m%d"),
                 "session_source_medium": row.dimension_values[1].value,
                 "url": url,
-                "active_users": int(row.metric_values[0].value),
-                "date": datetime.strptime(row.dimension_values[0].value, "%Y%m%d"),
-                "sessions": int(row.metric_values[1].value),
-            }
-            for row in response.rows
-        ]
+                "content": row.dimension_values[3].value,
 
-    def process_response_table(self, response: RunReportResponse, url: str) -> List[Dict[str, Any]]:
-        return [
-            {
-                "session_source_medium": row.dimension_values[0].value,
-                "url": url,
                 "active_users": int(row.metric_values[0].value),
-                "average_session_duration": float(row.metric_values[1].value),
-                "bounce_rate": float(row.metric_values[2].value),
-                "sessions": int(row.metric_values[3].value),
-                "content": row.dimension_values[2].value,
+                "sessions": int(row.metric_values[1].value),
+                "bounce_rate": int(round(float(row.metric_values[2].value), 2) * 100),
+                "average_session_duration": int(round(float(row.metric_values[3].value), 2) * 100),
             }
             for row in response.rows
         ]

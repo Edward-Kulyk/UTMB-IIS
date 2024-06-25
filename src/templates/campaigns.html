@@ -9,87 +9,206 @@
 
 {% block content %}
 <div class="campaign-tabs-wrapper">
-<h1>Campaigns Overview</h1>
-    <div class="campaign-tabs-statistics">
-<div class="campaign-tabs">
-    <ul>
+  <h1>Campaigns Overview</h1>
+  <div class="campaign-tabs-statistics">
+    <div class="campaign-tabs">
+      <ul>
         {% for campaign in campaign_list %}
         <li class="campaign-tab" data-campaign-id="{{ campaign.campaign_id }}">
-            {{ campaign.campaign_name }}
-<!--            <p>{{ campaign.campaign_start_date }}</p>-->
+          {{ campaign.campaign_name }}
         </li>
         {% endfor %}
-    </ul>
-</div>
-        <div class="graph"></div>
+      </ul>
     </div>
+    <div class="date-filters-container">
+      <div class="date-filters">
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" name="start-date">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" name="end-date">
+        <button id="apply-date-filter" class="filter-btn">Apply</button>
+      </div>
+      <div class="graph"></div>
+    </div>
+  </div>
 </div>
 
 <div class="campaign-contents">
-    <div id="campaign-content">
-        <!-- Здесь будут отображаться данные выбранной кампании -->
-    </div>
+  <div id="campaign-content" class="campaign-content-container">
+    <!-- Campaign data will be displayed here -->
+  </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Обработчик нажатия на вкладку кампании
+    var currentFilter = 'all';
+    var sortOrder = { column: 'clicks_total', order: 'desc' }; // Default sort order
+
+    // Campaign tab click handler
     $('.campaign-tab').on('click', function() {
+        $('.campaign-tab').removeClass('selected');
+        $(this).addClass('selected');
         var campaignId = $(this).data('campaign-id');
-        console.log("request send")
-        // Отправка AJAX-запроса на сервер для получения данных о кампании
-        $.ajax({
-            url: '/campaigns/api/table/' + campaignId,
-            method: 'GET',
-            success: function(data) {
-                // Обновление содержимого кампании
-                var contentHtml = '<h2>' + data.campaign_name + ' - [Launch Date: ' + data.start_date + ']</h2>';
-                contentHtml += '<table>';
-                contentHtml += '<thead><tr>';
-                contentHtml += '<th>Short Secure URL</th>';
-                contentHtml += '<th>Campaign Content</th>';
-                contentHtml += '<th>Campaign Source</th>';
-                contentHtml += '<th>Campaign Medium</th>';
-                contentHtml += '<th>Clicks 24h</th>';
-                contentHtml += '<th>Clicks W1</th>';
-                contentHtml += '<th>Clicks W2</th>';
-                contentHtml += '<th>Clicks W3</th>';
-                contentHtml += '<th>Total Clicks</th>';
-                contentHtml += '<th>Users</th>';
-                contentHtml += '<th>Sessions</th>';
-                contentHtml += '<th>Avg session duration</th>';
-                contentHtml += '<th>Bounce rate</th>';
-                contentHtml += '</tr></thead>';
-                contentHtml += '<tbody>';
+        console.log("Campaign changed to:", campaignId);
 
-                data.forEach(function(link) {
-                    contentHtml += '<tr>';
-                    contentHtml += '<td>' + link.short_secure_url + '</td>';
-                    contentHtml += '<td>' + link.campaign_content + '</td>';
-                    contentHtml += '<td>' + link.campaign_source + '</td>';
-                    contentHtml += '<td>' + link.campaign_medium + '</td>';
-                    contentHtml += '<td>' + link.clicks_1d + '</td>';
-                    contentHtml += '<td>' + link.clicks_7d + '</td>';
-                    contentHtml += '<td>' + link.clicks_14d + '</td>';
-                    contentHtml += '<td>' + link.clicks_21d + '</td>';
-                    contentHtml += '<td>' + link.clicks_total + '</td>';
-                    contentHtml += '<td>' + link.ga_active_users + '</td>';
-                    contentHtml += '<td>' + link.ga_sessions + '</td>';
-                    contentHtml += '<td>' + link.ga_average_session_duration + '</td>';
-                    contentHtml += '<td>' + link.bounce_rate + '</td>';
-                    contentHtml += '</tr>';
-                });
+        $('#start-date').val('');
+        $('#end-date').val('');
 
-                contentHtml += '</tbody></table>';
-                $('#campaign-content').html(contentHtml);
-            },
-            error: function(error) {
-                console.log('Ошибка при загрузке данных кампании:', error);
-            }
-        });
+        fetchCampaignData(campaignId);
     });
 
+    // Date filter apply button click handler
+    $('#apply-date-filter').on('click', function() {
+        var campaignId = $('.campaign-tab.selected').data('campaign-id');
+        if (!campaignId) {
+            alert("Please select a campaign first.");
+            return;
+        }
+        console.log("Applying date filters for campaign ID:", campaignId);
+        fetchCampaignData(campaignId);
+    });
 
+    // Fetch campaign data with date filters
+    function fetchCampaignData(campaignId) {
+        var startDate = $('#start-date').val();
+        var endDate = $('#end-date').val();
+
+        var url = `/campaigns/api/table/${campaignId}`;
+        var queryParams = [];
+        if (startDate) queryParams.push(`start_date=${startDate}`);
+        if (endDate) queryParams.push(`end_date=${endDate}`);
+        if (queryParams.length) url += '?' + queryParams.join('&');
+
+        console.log("Fetching data from:", url);
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(data) {
+                updateCampaignContent(data);
+            },
+            error: function(error) {
+                console.error('Error fetching campaign data:', error);
+            }
+        });
+    }
+
+    // Update campaign content
+    function updateCampaignContent(data) {
+        var contentHtml = '<div class="filter-buttons">';
+        contentHtml += '<button id="filter-clicks" class="filter-btn">Clicks</button>';
+        contentHtml += '<button id="filter-ga4" class="filter-btn">GA4</button>';
+        contentHtml += '<button id="filter-all" class="filter-btn">All</button>';
+        contentHtml += '</div>';
+        contentHtml += '<h2>' + data.campaign_name + ' - [Launch Date: ' + data.start_date + ']</h2>';
+        contentHtml += '<table>';
+        contentHtml += '<thead><tr>';
+        contentHtml += '<th>Short Secure URL</th>';
+        contentHtml += '<th>Campaign Content</th>';
+        contentHtml += '<th>Campaign Source</th>';
+        contentHtml += '<th>Campaign Medium</th>';
+        contentHtml += '<th class="sortable" data-sort="clicks_total">Clicks</th>';
+        contentHtml += '<th class="sortable" data-sort="ga_active_users">Users</th>';
+        contentHtml += '<th class="sortable" data-sort="ga_sessions">Sessions</th>';
+        contentHtml += '<th class="sortable" data-sort="ga_average_session_duration">Avg session duration</th>';
+        contentHtml += '<th class="sortable" data-sort="bounce_rate">Bounce rate</th>';
+        contentHtml += '</tr></thead>';
+        contentHtml += '<tbody>';
+
+        data.forEach(function(link) {
+            contentHtml += '<tr>';
+            contentHtml += '<td class="short-url">' + (link.short_secure_url || '-') + '</td>';
+            contentHtml += '<td>' + (link.campaign_content || '-') + '</td>';
+            contentHtml += '<td>' + (link.campaign_source || '-') + '</td>';
+            contentHtml += '<td>' + (link.campaign_medium || '-') + '</td>';
+            contentHtml += '<td class="clicks_total">' + (link.clicks_total !== undefined ? link.clicks_total : '-') + '</td>';
+            contentHtml += '<td class="ga_active_users">' + (link.ga_active_users !== undefined ? link.ga_active_users : '-') + '</td>';
+            contentHtml += '<td class="ga_sessions">' + (link.ga_sessions !== undefined ? link.ga_sessions : '-') + '</td>';
+            contentHtml += '<td class="ga_average_session_duration">' + (link.ga_average_session_duration !== undefined ? link.ga_average_session_duration : '-') + '</td>';
+            contentHtml += '<td class="bounce_rate">' + (link.bounce_rate !== undefined ? link.bounce_rate : '-') + '</td>';
+            contentHtml += '</tr>';
+        });
+
+        contentHtml += '</tbody></table>';
+        $('#campaign-content').html(contentHtml);
+        addFilterHandlers();
+        addSortHandlers(); // Add sort handlers after updating content
+        sortTable(sortOrder.column, sortOrder.order); // Sort by default column and order
+    }
+
+    // Add filter handlers
+    function addFilterHandlers() {
+        $('#filter-clicks').on('click', function() {
+            currentFilter = 'clicks';
+            filterTable();
+        });
+
+        $('#filter-ga4').on('click', function() {
+            currentFilter = 'ga4';
+            filterTable();
+        });
+
+        $('#filter-all').on('click', function() {
+            currentFilter = 'all';
+            filterTable();
+        });
+    }
+
+    // Filter table
+    function filterTable() {
+        $('table tbody tr').each(function() {
+            var shortUrl = $(this).find('.short-url').text();
+            if (currentFilter === 'clicks' && shortUrl !== '-') {
+                $(this).show();
+            } else if (currentFilter === 'ga4' && shortUrl === '-') {
+                $(this).show();
+            } else if (currentFilter === 'all') {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    // Add sort handlers
+    function addSortHandlers() {
+        $('.sortable').on('click', function() {
+            var column = $(this).data('sort');
+            var order = sortOrder.order === 'asc' ? 'desc' : 'asc';
+            sortOrder = { column: column, order: order };
+            sortTable(column, order);
+        });
+    }
+
+    // Sort table by column and order
+    function sortTable(column, order) {
+        var rows = $('table tbody tr').get();
+
+        rows.sort(function(a, b) {
+            var A = $(a).find('.' + column).text();
+            var B = $(b).find('.' + column).text();
+
+            // Treat "-" as 0 for sorting purposes
+            if (A === '-') A = 0;
+            if (B === '-') B = 0;
+
+            if ($.isNumeric(A) && $.isNumeric(B)) {
+                A = parseFloat(A);
+                B = parseFloat(B);
+            }
+
+            if (order === 'asc') {
+                return (A < B) ? -1 : (A > B) ? 1 : 0;
+            } else {
+                return (A > B) ? -1 : (A < B) ? 1 : 0;
+            }
+        });
+
+        $.each(rows, function(index, row) {
+            $('table').children('tbody').append(row);
+        });
+    }
 });
 </script>
 {% endblock %}

@@ -5,7 +5,7 @@ from sqlalchemy import ColumnElement
 
 
 # noinspection PyTypeChecker
-def build_analytics_request_graph(
+def build_analytics_request(
     property_id: str | ColumnElement[str],
     url: str | ColumnElement[str],
     start_date: datetime | ColumnElement[date],
@@ -17,10 +17,13 @@ def build_analytics_request_graph(
             Dimension(name="Date"),
             Dimension(name="sessionSourceMedium"),
             Dimension(name="landingPage"),
+            Dimension(name="sessionManualAdContent"),
         ],
         metrics=[
             Metric(name="activeUsers"),
             Metric(name="sessions"),
+            Metric(name="bounceRate"),
+            Metric(name="averageSessionDuration"),
         ],
         date_ranges=[DateRange(start_date=start_date.strftime("%Y-%m-%d"), end_date=end_date.strftime("%Y-%m-%d"))],
         dimension_filter=FilterExpression(
@@ -30,6 +33,5 @@ def build_analytics_request_graph(
             )
         ),
         metric_aggregations=["TOTAL"],
-        limit=1000,
     )
     return request
