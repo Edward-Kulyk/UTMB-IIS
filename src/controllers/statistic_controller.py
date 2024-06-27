@@ -21,7 +21,7 @@ def campaigns_statistics():
 def campaigns_data(campaign_id: int):
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    print(f"Received start date: {start_date} and end date: {end_date,campaign_id}")
+    print(f"Received start date: {start_date} and end date: {end_date, campaign_id}")
     return campaign_info(campaign_id, start_date, end_date)
 
 
@@ -29,8 +29,21 @@ def campaigns_data(campaign_id: int):
 def campaigns_graph_info(campaign_id: int):
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-    print(f"Received start date: {start_date} and end date: {end_date,campaign_id}")
+    print(f"Received start date: {start_date} and end date: {end_date, campaign_id}")
     return campaign_graph(campaign_id, start_date, end_date)
+
+
+@statistics_bp.route("/campaigns/api/quarter_table/<int:quarter><int:year>", methods=["GET"])
+def quarter_overview_table(quarter: int, year: int):
+    return quarter_info(quarter, year)
+
+
+@statistics_bp.route("/campaigns/api/quarter_graph/<int:quarter><int:year>", methods=["GET"])
+def quarter_overview_graph(campaign_id: int):
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    print(f"Received start date: {start_date} and end date: {end_date, campaign_id}")
+    return quarter_graph(campaign_id, start_date, end_date)
 
 
 @statistics_bp.route("/campaigns/api/query/<int:campaign_id>", methods=["GET"])

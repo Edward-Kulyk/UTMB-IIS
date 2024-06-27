@@ -1,3 +1,4 @@
+import time
 from typing import Dict
 from flask import Blueprint, jsonify, render_template, request, redirect
 from pydantic_core import ValidationError
@@ -8,7 +9,7 @@ from src.forms.link_creation_form import LinkCreationForm
 from src.repositories.utm_link_repository import delete_link
 from src.services.campaign_service import edit_campaign_row
 from src.services.option_service import get_options_context
-from src.services.statistic_service import update_ga
+from src.services.statistic_service import update_ga, get_click_data
 from src.services.utm_link_service import create_link
 from src.utils.extarnal_api.short_io import ShortLinkManager
 
@@ -67,4 +68,5 @@ def delete_link_api(short_link_id: str):
 @link.route("/update_clicks", methods=["GET"])
 def update_info():
     update_ga()
+    get_click_data()
     return redirect("/")

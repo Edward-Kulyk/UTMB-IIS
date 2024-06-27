@@ -1,51 +1,104 @@
 from collections import defaultdict
-from datetime import timedelta, date
+from datetime import timedelta, datetime
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Sequence, Optional
 from urllib.parse import urlparse
 
 import xlsxwriter
-from sqlalchemy import Column, Date
 
-import config
+from config import Config
 from src.database.db import get_session
-from src.database.models import GoogleAnalyticsData
-from src.repositories.campaign_repository import get_campaign_by_id, get_campaign_list
-from src.repositories.statistics_repository import get_click_count, get_ga_data, get_ga_data_other, get_graph_data, \
-    insert_or_update_data
-from src.repositories.utm_link_repository import get_filtered_links, get_links_by_campaign
+from src.database.models import GoogleAnalyticsData, ClicksDate, Campaign
+from src.repositories import campaign_repository, statistics_repository, utm_link_repository
 from src.utils.extarnal_api.google_analytics import GoogleAnalyticsService
+from src.utils.extarnal_api.short_io import ShortLinkManager
 from src.utils.google_analytics_requests.graph_request import build_analytics_request
 
 
 def update_ga() -> None:
     with get_session() as session:
-        campaigns = get_campaign_list(session, False)
-        service = GoogleAnalyticsService(config.Config.SERVICE_ACCOUNT_FILE)
-        for property_id in config.Config.PROPERTY_IDS:
-            for campaign in campaigns:
-                start_date = campaign.start_date - timedelta(weeks=10)
-                end_date = campaign.start_date + timedelta(weeks=13)
-                parsed_url = (urlparse(campaign.url_by_default)).path[:-1]
-                info = service.run_report(build_analytics_request(property_id, parsed_url, start_date, end_date))
+        campaigns = campaign_repository.get_campaign_list(session)
+        service = GoogleAnalyticsService(Config.SERVICE_ACCOUNT_FILE)
 
-                ga_data = service.process_response(info, campaign.url_by_default)
-                for data in ga_data:
-                    filters = {
-                        "session_source_medium": data["session_source_medium"],
-                        "content": data["content"],
-                        "url": data["url"],
-                        "date": data["date"].date(),
-                    }
-                    insert_or_update_data(session, GoogleAnalyticsData, filters, data)
+        for property_id in Config.PROPERTY_IDS:
+            process_property(service, property_id, campaigns, session)
 
 
-def campaign_list(list_type: bool = None) -> list[dict[str, Any]]:
-    campaigns_data = []
+def process_property(service: GoogleAnalyticsService, property_id: str, campaigns: Sequence[Campaign], session) -> None:
+    for campaign in campaigns:
+        process_campaign(service, property_id, campaign, session)
+
+
+def process_campaign(service: GoogleAnalyticsService, property_id: str, campaign: Campaign, session) -> None:
+    start_date = campaign.start_date - timedelta(weeks=10)
+    end_date = campaign.start_date + timedelta(weeks=13)
+    parsed_url = urlparse(campaign.url_by_default).path[:-1]
+
+    analytics_request = build_analytics_request(property_id, parsed_url, start_date, end_date)
+    info = service.run_report(analytics_request)
+    ga_data = service.process_response(info, campaign.url_by_default)
+
+    for data in ga_data:
+        update_ga_data(session, data)
+
+
+def update_ga_data(session, data: Dict[str, Any]) -> None:
+    filters = {
+        "session_source_medium": data["session_source_medium"],
+        "content": data["content"],
+        "url": data["url"],
+        "date": data["date"].date(),
+    }
+    statistics_repository.insert_or_update_data(session, GoogleAnalyticsData, filters, data)
+
+
+def get_click_data() -> None:
     with get_session() as session:
-        campaigns = get_campaign_list(session, list_type)
+        campaigns = campaign_repository.get_campaign_list(session)
+        sm = ShortLinkManager(Config.SHORT_IO_API_KEY)
+
         for campaign in campaigns:
-            campaign_data = {
+            for link in campaign.links:
+                response = sm.get_clicks_filter(link.short_id, campaign.start_date - timedelta(weeks=4),
+                                                campaign.start_date + timedelta(weeks=8))
+                process_clicks_data(session, link.id, response)
+
+
+def process_clicks_data(session, link_id: int, click_data: Dict[str, Any]) -> None:
+    datasets = click_data.get('clickStatistics', {}).get('datasets', [])
+
+    for dataset in datasets:
+        for click in dataset.get('data', []):
+            process_single_click(session, link_id, click)
+
+
+def process_single_click(session, link_id: int, click: Dict[str, Any]) -> None:
+    click_date = datetime.strptime(click['x'], '%Y-%m-%dT%H:%M:%S.%fZ').date()
+    new_clicks_count = int(click['y'])
+    link_click_date = statistics_repository.get_clicks_data(session, link_id, click_date)
+
+    if link_click_date:
+        update_existing_click(link_id, click_date, new_clicks_count, link_click_date)
+    else:
+        create_new_click(session, link_id, click_date, new_clicks_count)
+
+
+def update_existing_click(link_id: int, click_date: datetime.date, new_clicks_count: int, link_click_date) -> None:
+    if new_clicks_count > link_click_date.clicks_count:
+        link_click_date.clicks_count = new_clicks_count
+
+
+def create_new_click(session, link_id: int, click_date: datetime.date, new_clicks_count: int) -> None:
+    link_click_date = ClicksDate(link_id=link_id, date=click_date, clicks_count=new_clicks_count)
+    statistics_repository.add_clicks_data(session, link_click_date)
+    print(f"Created: {link_id}, Date: {click_date}, Clicks: {new_clicks_count}")
+
+
+def campaign_list(list_type: Optional[bool] = None) -> List[Dict[str, Any]]:
+    with get_session() as session:
+        campaigns = campaign_repository.get_campaign_list(session, list_type)
+        return [
+            {
                 "campaign_id": campaign.id,
                 "campaign_name": campaign.name,
                 "campaign_start_date": campaign.start_date,
@@ -53,26 +106,25 @@ def campaign_list(list_type: bool = None) -> list[dict[str, Any]]:
                 "campaign_domain_by_default": campaign.domain_by_default,
                 "campaign_hide": campaign.hide,
             }
-            campaigns_data.append(campaign_data)
-    return campaigns_data
+            for campaign in campaigns
+        ]
 
 
-def campaign_info(campaign_id: int, start_date, end_date) -> List[Dict[str, Any]] | None:
-    links_data = []
+def campaign_info(campaign_id: int, start_date: Optional[datetime.date] = None,
+                  end_date: Optional[datetime.date] = None) -> Optional[List[Dict[str, Any]]]:
     with get_session() as session:
-        campaign = get_campaign_by_id(session, campaign_id)
+        campaign = campaign_repository.get_campaign_by_id(session, campaign_id)
         if not campaign:
             return None
-        links = get_links_by_campaign(session, campaign.name)
+
+        links = utm_link_repository.get_links_by_campaign(session, campaign.name)
         if not links:
             return None
 
-        if not start_date:
-            start_date = campaign.start_date - timedelta(weeks=10)
+        start_date = start_date or (campaign.start_date - timedelta(weeks=10))
+        end_date = end_date or (campaign.start_date + timedelta(weeks=13))
 
-        if not end_date:
-            end_date = campaign.start_date + timedelta(weeks=13)
-
+        links_data = []
         for link in links:
             link_info = {
                 "id": link.id,
@@ -82,13 +134,11 @@ def campaign_info(campaign_id: int, start_date, end_date) -> List[Dict[str, Any]
                 "campaign_medium": link.campaign_medium,
                 "short_id": link.short_id,
                 "short_secure_url": link.short_secure_url,
-                "clicks_total": get_click_count(session, link.id, start_date, end_date),
-
+                "clicks_total": statistics_repository.get_click_count(session, link.id, start_date, end_date),
             }
             link_info.update(
                 ga_data_format(link.url, link.campaign_source, link.campaign_medium, link.campaign_content, start_date,
-                               end_date)
-            )
+                               end_date))
             links_data.append(link_info)
 
         campaign_contents = [link["campaign_content"] for link in links_data]
@@ -104,85 +154,81 @@ def ga_data_format(
         url: str,
         campaign_source: str,
         campaign_medium: str,
-        campaign_content: str | None, start_date, end_date
-) -> dict[str, object]:
+        campaign_content: Optional[str],
+        start_date: datetime.date,
+        end_date: datetime.date
+) -> Dict[str, Any]:
     ga_info = {
         "ga_active_users": 0,
         "ga_sessions": 0,
-        "ga_average_session_duration": 0,
+        "ga_average_session_duration": "0s",
         "bounce_rate": "0%",
     }
 
     with get_session() as session:
-        result = (get_ga_data(session, url, f"{campaign_source} / {campaign_medium}", campaign_content, start_date,
-                              end_date))
+        result = statistics_repository.get_ga_data(session, url, f"{campaign_source} / {campaign_medium}",
+                                                   campaign_content, start_date, end_date)
         if result:
-            users, session, session_duration, bounce_rate = result[0]
+            users, sessions, session_duration, bounce_rate = result[0]
 
-            session_duration = (
-                f"{round(session_duration)}s"
-                if session_duration < 60
-                else f"{round(session_duration) // 60}m {round(session_duration) % 60}s"
-            )
             ga_info["ga_active_users"] = users or 0
-            ga_info["ga_sessions"] = session or 0
-            ga_info["ga_average_session_duration"] = session_duration or 0
+            ga_info["ga_sessions"] = sessions or 0
+            ga_info["ga_average_session_duration"] = format_duration(session_duration)
             ga_info["bounce_rate"] = f"{round(bounce_rate, 2)}%" if bounce_rate else "0%"
 
     return ga_info
 
 
-def get_ga_data_other_list(url: Column[str] | str, source_medium: list, campaign_content: list, start_date, end_date) -> \
-        List[Dict[str, Any]]:
-    with get_session() as session:
-        ga_result = get_ga_data_other(session, url, source_medium, campaign_content, start_date, end_date)
+def format_duration(duration: float) -> str:
+    if duration < 60:
+        return f"{round(duration)}s"
+    return f"{round(duration) // 60}m {round(duration) % 60}s"
 
-        ga_info_list = []
-        for row in ga_result:
-            campaign_source, campaign_medium = (
-                (row[0].split("/", 1) if "/" in row[0] else (row[0], "Unknown"))
-                if row[0] != "(not set)"
-                else ("Unknown", "Unknown")
-            )
-            session_duration = f"{round(row[5])}s" if row[5] < 60 else f"{round(row[5]) // 60}m {round(row[5]) % 60}s"
-            ga_info = {
+
+def get_ga_data_other_list(url: str, source_medium: List[str], campaign_content: List[str], start_date: datetime.date,
+                           end_date: datetime.date) -> List[Dict[str, Any]]:
+    with get_session() as session:
+        ga_result = statistics_repository.get_ga_data_other(session, url, source_medium, campaign_content, start_date,
+                                                            end_date)
+
+        return [
+            {
                 "url": url,
                 "campaign_content": row[2],
-                "campaign_source": campaign_source,
-                "campaign_medium": campaign_medium,
+                "campaign_source": row[0].split("/", 1)[0] if row[0] != "(not set)" else "Unknown",
+                "campaign_medium": row[0].split("/", 1)[1] if "/" in row[0] and row[0] != "(not set)" else "Unknown",
                 "ga_active_users": row[3],
                 "ga_sessions": row[4],
-                "ga_average_session_duration": session_duration,
+                "ga_average_session_duration": format_duration(row[5]),
                 "bounce_rate": f"{round(row[6], 2)}%" if row[6] else "0%",
             }
-            ga_info_list.append(ga_info)
+            for row in ga_result
+        ]
 
-    return ga_info_list
 
-
-def campaign_graph(campaign_id: int, start_date, end_date) -> dict:
+def campaign_graph(campaign_id: int, start_date: Optional[datetime.date] = None,
+                   end_date: Optional[datetime.date] = None) -> Dict[str, Dict[str, Dict[str, int]]]:
     with get_session() as session:
+        campaign = campaign_repository.get_campaign_by_id(session, campaign_id)
+        if not campaign:
+            return {}
 
-        campaign = get_campaign_by_id(session, campaign_id)
-        if campaign is not None:
-            if not start_date:
-                start_date = campaign.start_date - timedelta(weeks=10)
-            print(campaign.name)
-            if not end_date:
-                end_date = campaign.start_date + timedelta(weeks=13)
+        start_date = start_date or (campaign.start_date - timedelta(weeks=10))
+        end_date = end_date or (campaign.start_date + timedelta(weeks=13))
 
-            data = get_graph_data(session, campaign.name, start_date, end_date)
-        graph_data: dict = defaultdict(lambda: defaultdict(dict))
-        for record in data:
-            source_medium, date_str = record[0], record[1].isoformat()
-            graph_data[source_medium][date_str]["clicks"] = record[2] if record[2] is not None else 0
-            graph_data[source_medium][date_str]["sessions"] = record[3] if record[3] is not None else 0
+        data = statistics_repository.get_graph_data(session, campaign.name, start_date, end_date)
+
+        graph_data: Dict[str, Dict[str, Dict[str, int]]] = defaultdict(lambda: defaultdict(dict))
+        for source_medium, date, clicks, sessions in data:
+            date_str = date.isoformat()
+            graph_data[source_medium][date_str]["clicks"] = clicks or 0
+            graph_data[source_medium][date_str]["sessions"] = sessions or 0
 
     return graph_data
 
 
-def generate_campaign_excel(output: BytesIO, campaign_id: int) -> str | None:
-    campaign_data: List[Dict[str, Any]] | None = campaign_info(campaign_id)
+def generate_campaign_excel(output: BytesIO, campaign_id: int) -> Optional[str]:
+    campaign_data = campaign_info(campaign_id)
     if not campaign_data:
         return "Campaign is empty"
 
@@ -190,42 +236,22 @@ def generate_campaign_excel(output: BytesIO, campaign_id: int) -> str | None:
     worksheet = workbook.add_worksheet("Campaign Info")
 
     headers = [
-        "URL",
-        "Campaign Content",
-        "Campaign Source",
-        "Campaign Medium",
-        "Short ID",
-        "Short Secure URL",
-        "Clicks Total",
-        "Clicks 1d",
-        "Clicks 7d",
-        "Clicks 14d",
-        "Clicks 21d",
-        "GA Active Users",
-        "GA Sessions",
-        "GA Average Session Duration",
-        "Bounce Rate",
+        "URL", "Campaign Content", "Campaign Source", "Campaign Medium",
+        "Short ID", "Short Secure URL", "Clicks Total", "Clicks 1d",
+        "Clicks 7d", "Clicks 14d", "Clicks 21d", "GA Active Users",
+        "GA Sessions", "GA Average Session Duration", "Bounce Rate",
     ]
     for col, header in enumerate(headers):
         worksheet.write(0, col, header)
 
     for row_num, data in enumerate(campaign_data, start=1):
         row = [
-            data.get("url", ""),
-            data.get("campaign_content", ""),
-            data.get("campaign_source", ""),
-            data.get("campaign_medium", ""),
-            data.get("short_id", ""),
-            data.get("short_secure_url", ""),
-            data.get("clicks_total", ""),
-            data.get("clicks_1d", ""),
-            data.get("clicks_7d", ""),
-            data.get("clicks_14d", ""),
-            data.get("clicks_21d", ""),
-            data.get("ga_active_users", ""),
-            data.get("ga_sessions", ""),
-            data.get("ga_average_session_duration", ""),
-            data.get("bounce_rate", ""),
+            data.get(key, "") for key in [
+                "url", "campaign_content", "campaign_source", "campaign_medium",
+                "short_id", "short_secure_url", "clicks_total", "clicks_1d",
+                "clicks_7d", "clicks_14d", "clicks_21d", "ga_active_users",
+                "ga_sessions", "ga_average_session_duration", "bounce_rate",
+            ]
         ]
         for col, value in enumerate(row):
             worksheet.write(row_num, col, value)
@@ -234,24 +260,66 @@ def generate_campaign_excel(output: BytesIO, campaign_id: int) -> str | None:
     return None
 
 
-def filtered_statistic(form_data: dict) -> list:
+def filtered_statistic(form_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     with get_session() as session:
-        links = get_filtered_links(session, form_data)
+        links = utm_link_repository.get_filtered_links(session, form_data)
 
-        links_data = []
-        for link in links:
-            link_info = {
+        return [
+            {
                 "url": link.url,
                 "campaign_content": link.campaign_content,
                 "campaign_source": link.campaign_source,
                 "campaign_medium": link.campaign_medium,
                 "short_id": link.short_id,
                 "short_secure_url": link.short_secure_url,
-                "clicks": get_click_count(session, link.id, form_data["date_from"], form_data["date_to"]),
+                "clicks": statistics_repository.get_click_count(session, link.id, form_data["date_from"],
+                                                                form_data["date_to"]),
+                **ga_data_format(link.url, link.campaign_source, link.campaign_medium, link.campaign_content,
+                                 form_data["date_from"], form_data["date_to"])
             }
-            if None not in (link.url, link.campaign_source, link.campaign_medium, link.campaign_content):
-                link_info.update(
-                    ga_data_format(link.url, link.campaign_source, link.campaign_medium, link.campaign_content)
-                )
+            for link in links
+            if None not in (link.url, link.campaign_source, link.campaign_medium, link.campaign_content)
+        ]
+
+
+def quarter_info(year, quarter):
+    with get_session() as session:
+        start_date, end_date = get_quarter_dates(year, quarter)
+        campaigns = campaign_repository.get_campaign_list_in_date_range(session, start_date, end_date)
+        if not campaigns:
+            return None
+        campaigns_info = []
+        for campaign in campaigns:
+            link_info = {
+                "id": campaign.id,
+                "url": campaign.url_by_default,
+                "campaign_link_count": len(campaign.links),
+
+                "clicks_total": statistics_repository.get_click_count(session, link.id, start_date, end_date),
+            }
+            link_info.update(
+                ga_data_format(link.url, link.campaign_source, link.campaign_medium, link.campaign_content,
+                               start_date,
+                               end_date))
             links_data.append(link_info)
-    return links_data
+
+
+
+
+def get_quarter_dates(year, quarter):
+    if quarter == 1:
+        start_date = datetime(year, 1, 1)
+        end_date = datetime(year, 3, 31)
+    elif quarter == 2:
+        start_date = datetime(year, 4, 1)
+        end_date = datetime(year, 6, 30)
+    elif quarter == 3:
+        start_date = datetime(year, 7, 1)
+        end_date = datetime(year, 9, 30)
+    elif quarter == 4:
+        start_date = datetime(year, 10, 1)
+        end_date = datetime(year, 12, 31)
+    else:
+        raise ValueError("Quarter must be between 1 and 4")
+
+    return start_date, end_date

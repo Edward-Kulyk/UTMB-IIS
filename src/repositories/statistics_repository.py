@@ -1,7 +1,8 @@
+import datetime
 from datetime import date
 from typing import Any, Sequence, Dict
 
-from sqlalchemy import Column, Row, and_, func, select, tuple_, insert, update
+from sqlalchemy import Column, Row, and_, func, select, tuple_, insert, update, union_all
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import concat
 
@@ -85,7 +86,8 @@ def get_graph_data(session: Session, campaign_name: Column[str] | str, start_dat
         .join(ClicksDate.link)
         .outerjoin(
             GoogleAnalyticsData,
-            (concat(UTMLink.campaign_source, " / ", UTMLink.campaign_medium) == GoogleAnalyticsData.session_source_medium)
+            (concat(UTMLink.campaign_source, " / ",
+                    UTMLink.campaign_medium) == GoogleAnalyticsData.session_source_medium)
             & (UTMLink.url == GoogleAnalyticsData.url),
         )
         .group_by(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url)
@@ -97,7 +99,7 @@ def get_graph_data(session: Session, campaign_name: Column[str] | str, start_dat
         .order_by(func.sum(GoogleAnalyticsData.sessions).desc(), func.sum(ClicksDate.clicks_count).desc())
         .limit(5)
     )
-    stmt = (
+    left_join = (
         select(
             concat(UTMLink.campaign_source, " / ", UTMLink.campaign_medium).label("source_medium"),
             ClicksDate.date,
@@ -115,14 +117,54 @@ def get_graph_data(session: Session, campaign_name: Column[str] | str, start_dat
                 ClicksDate.date == GoogleAnalyticsData.date,
             ),
         )
-        .where(tuple_(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url).in_(sub_query),
-               ClicksDate.date >= start_date,
-               ClicksDate.date <= end_date,
-               GoogleAnalyticsData.date >= start_date,
-               GoogleAnalyticsData.date <= end_date
-               )
+        .where(
+            tuple_(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url).in_(sub_query),
+            ClicksDate.date >= start_date,
+            ClicksDate.date <= end_date
+        )
         .group_by(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url, ClicksDate.date)
-        .order_by(UTMLink.campaign_source, UTMLink.campaign_medium, ClicksDate.date)
+    )
+
+    right_join = (
+        select(
+            concat(UTMLink.campaign_source, " / ", UTMLink.campaign_medium).label("source_medium"),
+            GoogleAnalyticsData.date,
+            func.sum(ClicksDate.clicks_count).label("total_clicks"),
+            func.sum(GoogleAnalyticsData.sessions).label("total_sessions"),
+        )
+        .select_from(GoogleAnalyticsData)
+        .join(UTMLink, and_(
+            concat(UTMLink.campaign_source, " / ", UTMLink.campaign_medium)
+            == GoogleAnalyticsData.session_source_medium,
+            UTMLink.url == GoogleAnalyticsData.url
+        ))
+        .outerjoin(
+            ClicksDate,
+            and_(
+                ClicksDate.link_id == UTMLink.id,
+                ClicksDate.date == GoogleAnalyticsData.date
+            ),
+        )
+        .where(
+            tuple_(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url).in_(sub_query),
+            GoogleAnalyticsData.date >= start_date,
+            GoogleAnalyticsData.date <= end_date
+        )
+        .group_by(UTMLink.campaign_source, UTMLink.campaign_medium, UTMLink.url, GoogleAnalyticsData.date)
+    )
+
+    full_outer_join = union_all(left_join, right_join).alias('full_outer_join')
+
+    stmt = (
+        select(
+            full_outer_join.c.source_medium,
+            full_outer_join.c.date,
+            func.sum(full_outer_join.c.total_clicks).label("total_clicks"),
+            func.sum(full_outer_join.c.total_sessions).label("total_sessions")
+        )
+        .select_from(full_outer_join)
+        .group_by(full_outer_join.c.source_medium, full_outer_join.c.date)
+        .order_by(full_outer_join.c.source_medium, full_outer_join.c.date)
     )
     return session.execute(stmt).all()
 
@@ -133,7 +175,25 @@ def insert_or_update_data(session: Session, model: GoogleAnalyticsData, filters:
     if existing_record:
         if data["sessions"] > existing_record.sessions:
             session.execute(update(model).where(model.id == existing_record.id).values(**data))
-            print("Updated")
     else:
         session.execute(insert(model).values(**data))
-        print("Inserted")
+
+
+def get_clicks_data(session: Session, link_id, click_date):
+    return session.execute(
+        select(ClicksDate).where(ClicksDate.link_id == link_id, ClicksDate.date == click_date)).scalars().first()
+
+
+def get_total_clicks_by_campaign(session: Session, campaign_name: str, start_date: date, end_date: date):
+    stmt = (
+        select(func.sum(ClicksDate.clicks_count))
+        .join(UTMLink)
+        .where(UTMLink.campaign_name == campaign_name)
+        .where(ClicksDate.date >= start_date)
+        .where(ClicksDate.date <= end_date)
+    )
+    return session.execute(stmt).scalar()
+
+
+def add_clicks_data(session: Session, clicks: ClicksDate):
+    session.add(clicks)

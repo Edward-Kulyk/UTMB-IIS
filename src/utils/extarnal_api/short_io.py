@@ -27,8 +27,8 @@ class ShortLinkManager:
         return response.json()
 
     def get_clicks_filter(self, short_id: str, start_date: date, end_date: date):
-        url = f"https://api-v2.short.io/statistics/link/{short_id}"
-        querystring = {"period": "custom", "tz": "UTC", "startDate": start_date, "endDate": end_date}
+        url = f"https://statistics.short.io/statistics/link/{short_id}"
+        querystring = {"period": "custom", "tz": "UTC", "startDate": start_date, "endDate": end_date,"clicksChartInterval":"day"}
 
         for attempt in range(8):
             try:
@@ -36,7 +36,7 @@ class ShortLinkManager:
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code == 429:
-                    time.sleep(2**attempt)
+                    time.sleep(2 ** attempt)
                 else:
                     raise ValueError(f"Failed to get statistic: {response.text}")
             except requests.RequestException:

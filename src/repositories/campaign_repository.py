@@ -21,3 +21,8 @@ def get_campaign_list(session: Session, list_type: bool = None) -> Sequence[Camp
 
 def get_campaign_by_name(session: Session, campaign_name: str) -> Campaign | None:
     return session.execute(select(Campaign).where(Campaign.name == campaign_name)).scalar_one_or_none()
+
+
+def get_campaign_list_in_date_range(session: Session, start_date, end_date) -> Sequence[Campaign]:
+    return session.execute(
+        select(Campaign).where(Campaign.start_date >= start_date, Campaign.start_date <= end_date)).scalars().all()

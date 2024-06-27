@@ -1,202 +1,354 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // Ссылки на ваши изображения
-    const editIcon = '<img src="static/images/edit.png" alt="Edit">';
-    const saveIcon = '<img src="static/images/save.png" alt="Save">';
-    const deleteIcon = '<img src="static/images/delete.png" alt="Delete">';
-
-    // Обработчик нажатия на кнопку сохранения изменений
-    document.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const row = this.closest('tr');
-            const deleteBtn = row.querySelector('.delete-btn');
-
-            if (row.classList.contains('editing')) {
-                // В режиме редактирования
-                const confirmSave = confirm("Save changes?");
-                if (confirmSave) {
-                    // Проверяем, заполнены ли все поля
-                    const inputs = row.querySelectorAll('td:not(:last-child)');
-                    let allFieldsFilled = true;
-                    inputs.forEach(input => {
-                        if (input.innerText.trim() === '') {
-                            allFieldsFilled = false;
-                        }
-                    });
-
-                    if (allFieldsFilled) {
-                        const id = row.id.split('-')[1];
-                        const data = {
-                            campaign_content: row.cells[1].innerText,
-                            campaign_source: row.cells[2].innerText,
-                            campaign_medium: row.cells[3].innerText,
-                            short_secure_url: row.cells[4].innerText,
-                        };
-
-                        fetch(`/edit-row/${id}`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(data)
-                        })
-                        .then(response => response.json())
-                        .then(result => {
-                            alert(result.message);
-                            if (result.status === 'success') {
-                                Array.from(row.cells).forEach(cell => cell.contentEditable = false);
-                                row.classList.remove('editing');
-                                button.innerHTML = editIcon; // Вернуть значок редактирования
-                                deleteBtn.innerHTML = deleteIcon; // Вернуть значок удаления
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                    } else {
-                        alert('Please fill in all fields before saving.');
-                    }
-                }
-            } else {
-                // Вход в режим редактирования
-                Array.from(row.cells).forEach((cell, index) => {
-                    if (index < row.cells.length - 6) {
-                        cell.dataset.originalValue = cell.innerText;
-                        cell.contentEditable = true;
-                    }
-                });
-                row.classList.add('editing');
-                this.innerHTML = saveIcon; // Задать значок сохранения
-                deleteBtn.innerHTML = '<img src="static/images/cancel.png" alt="Cancel">'; // Задать значок отмены
-            }
-        });
-    });
-
-    // Обработчик нажатия на кнопку удаления
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const row = this.closest('tr');
-            if (row.classList.contains('editing')) {
-                // Если мы в режиме редактирования, просто выходим из него
-                Array.from(row.cells).forEach(cell => cell.contentEditable = false);
-                row.classList.remove('editing');
-                const editBtn = row.querySelector('.edit-btn');
-                editBtn.innerHTML = editIcon; // Вернуть значок редактирования
-                this.innerHTML = deleteIcon;
-                // Восстанавливаем изначальные значения
-                Array.from(row.cells).forEach((cell, index) => {
-                    if (index < row.cells.length - 6) {
-                        cell.innerText = cell.dataset.originalValue;
-                    }
-                });
-            } else {
-                const id = row.id.split('-')[1];
-                const confirmDelete = confirm("Are you sure you want to delete this row?");
-                if (confirmDelete) {
-                    fetch(`/delete-row/${id}`, {
-                        method: 'POST',
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        alert(result.message);
-                        if (result.status === 'success') {
-                            row.remove();
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-                }
-            }
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    // Add click event listeners to all copy buttons
-    document.querySelectorAll('.table_title .copy-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            // Так как кнопка находится внутри .table_title, сначала нужно найти .table_title
-            const tableTitle = this.closest('.table_title');
-            // Затем, используем nextElementSibling, чтобы получить следующий элемент за .table_title, который должен быть .table-container
-            const tableContainer = tableTitle.nextElementSibling;
-            // Теперь, когда у нас есть .table-container, мы можем найти таблицу внутри него
-            const table = tableContainer.querySelector('table');
-            let tableContent = '';
-
-            // Loop through each row and collect the data
-            Array.from(table.rows).forEach((row) => {
-                // Check if the row is a 'Total Clicks' row
-                if (row.classList.contains('total-clicks')) {
-                    // Append the 'Total Clicks' text once followed by three tabs and then the total click counts
-                    tableContent += 'Total Clicks' + '\t'.repeat(4) + // One for 'Total Clicks' and three extra
-                                    row.cells[row.cells.length - 5].innerText.trim() + '\t' +
-                                    row.cells[row.cells.length - 4].innerText.trim() + '\t' +
-                                    row.cells[row.cells.length - 3].innerText.trim() + '\t' +
-                                    row.cells[row.cells.length - 2].innerText.trim() + '\t' +
-                                    row.cells[row.cells.length - 1].innerText.trim() + '\n';
-                } else {
-                    // For all other rows, copy all cells except the last one (Actions)
-                    let rowData = Array.from(row.cells).slice(0, -1)
-                                    .map(cell => cell.innerText.trim()) // Trim the cell text
-                                    .join('\t'); // Separate cells with a tab character
-                    tableContent += rowData + '\n'; // Add a newline after each row
-                }
-            });
-
-            // Attempt to copy the collected data to the clipboard
-            navigator.clipboard.writeText(tableContent.trim()).then(() => {
-                alert('Table content copied to clipboard.');
-            }).catch(err => {
-                console.error('Error copying table content:', err);
-                alert('Error copying table content. Please try again.');
-            });
-        });
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-  // Находим все кнопки "Show Details"
-  document.querySelectorAll('.toggle-details-btn').forEach(function(button) {
-    button.addEventListener('click', function() {
-      // Находим таблицу, которая является ближайшим родителем для кнопки
-      const table = button.closest('.table-container').querySelector('table');
-
-      // Внутри найденной таблицы переключаем видимость колонок
-      const detailsColumns = table.querySelectorAll('.clicks-details');
-      detailsColumns.forEach(function(col) {
-        col.classList.toggle('hidden');
-        col.classList.toggle('fade-in');
-      });
-    });
-  });
-});
-
 $(document).ready(function() {
-    $('.toggle-visibility-btn-table').click(function() {
-        // Находим ближайший родительский контейнер к нажатой кнопке
-        var $container = $(this).closest('.table-container');
+    var currentFilter = 'all';
+    var sortOrder = { column: 'clicks_total', order: 'desc' };
+    var chart;
+    var currentPage = 1;
+    var rowsPerPage = 10;
+    var totalRows = 0;
+    var filteredData = [];
+    var chartData;
 
-        // Внутри найденного контейнера переключаем свойство display для элементов с классом .table-hidden
-        var $hiddenElements = $container.find('.table-hidden');
-        $hiddenElements.toggle(); // Переключаем display
+    function getCurrentQuarterDates() {
+        var now = new Date();
+        var quarter = Math.floor((now.getMonth() / 3));
+        var startDate = new Date(now.getFullYear(), quarter * 3, 1);
+        var endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 3, 0);
 
-        // Добавляем небольшую задержку, чтобы убедиться, что элементы стали видимыми
-        setTimeout(function() {
-            $hiddenElements.each(function() {
-                // Проверяем, стал ли элемент видимым
-                if ($(this).css('display') !== 'none') {
-                    $(this).find('.campaign-graph').each(function() {
-                        var graphID = this.id; // Получаем ID видимого графика
-                        if (graphID) {
-                            var chartInstance = document.getElementById(graphID);
-                            if (chartInstance) {
-                                // Вызываем метод update для графика
-                                var chart = Chart.getChart(chartInstance);
-                                if (chart) {
-                                    chart.update();
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-        }, 100); // Задержка в миллисекундах
+        return {
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0]
+        };
+    }
+
+    // Set initial dates to current quarter
+    var currentQuarterDates = getCurrentQuarterDates();
+    $('#start-date').val(currentQuarterDates.start);
+    $('#end-date').val(currentQuarterDates.end);
+
+    // Campaign tab click handler
+    $('.campaign-tab').on('click', function() {
+        $('.campaign-tab').removeClass('selected');
+        $(this).addClass('selected');
+        var campaignId = $(this).data('campaign-id');
+        console.log("Campaign changed to:", campaignId);
+
+        // Reset dates to current quarter
+        var currentQuarterDates = getCurrentQuarterDates();
+        $('#start-date').val(currentQuarterDates.start);
+        $('#end-date').val(currentQuarterDates.end);
+
+        fetchCampaignData(campaignId);
+        fetchCampaignGraphData(campaignId);
     });
+
+    $('#apply-date-filter').on('click', function() {
+        var campaignId = $('.campaign-tab.selected').data('campaign-id');
+        if (!campaignId) {
+            alert("Please select a campaign first.");
+            return;
+        }
+        console.log("Applying date filters for campaign ID:", campaignId);
+        fetchCampaignData(campaignId);
+    });
+
+    function fetchCampaignData(campaignId) {
+        var startDate = $('#start-date').val();
+        var endDate = $('#end-date').val();
+
+        var tableUrl = `/campaigns/api/table/${campaignId}`;
+        var graphUrl = `/campaigns/api/graph/${campaignId}`;
+        var queryParams = [];
+        if (startDate) queryParams.push(`start_date=${startDate}`);
+        if (endDate) queryParams.push(`end_date=${endDate}`);
+        var queryString = queryParams.length ? '?' + queryParams.join('&') : '';
+
+        console.log("Fetching table data from:", tableUrl + queryString);
+        console.log("Fetching graph data from:", graphUrl + queryString);
+
+        $.when(
+            $.ajax({
+                url: tableUrl + queryString,
+                method: 'GET'
+            }),
+            $.ajax({
+                url: graphUrl + queryString,
+                method: 'GET'
+            })
+        ).done(function(tableData, graphData) {
+            updateCampaignContent(tableData[0]);
+            updateGraph(graphData[0]);
+        }).fail(function(error) {
+            console.error('Error fetching campaign data:', error);
+        });
+    }
+
+    function updateCampaignContent(data) {
+        filteredData = data;
+        currentPage = 1;
+        applyDefaultSort();
+        applyFilterAndSort();
+    }
+
+    function applyDefaultSort() {
+        switch (currentFilter) {
+            case 'all':
+                sortOrder = { column: 'clicks_total', order: 'desc' };
+                break;
+            case 'ga4':
+                sortOrder = { column: 'ga_sessions', order: 'desc' };
+                break;
+            case 'clicks':
+                sortOrder = { column: 'clicks_total', order: 'desc' };
+                break;
+        }
+    }
+
+    function applyFilterAndSort() {
+        var filteredRows = filteredData.filter(function(row) {
+            var shortUrl = row.short_secure_url || '-';
+            if (currentFilter === 'clicks' && shortUrl !== '-') {
+                return true;
+            } else if (currentFilter === 'ga4' && shortUrl === '-') {
+                return true;
+            } else if (currentFilter === 'all') {
+                return true;
+            }
+            return false;
+        });
+
+        filteredRows.sort(function(a, b) {
+            var A = a[sortOrder.column];
+            var B = b[sortOrder.column];
+
+            if (A === '-') A = 0;
+            if (B === '-') B = 0;
+
+            if ($.isNumeric(A) && $.isNumeric(B)) {
+                A = parseFloat(A);
+                B = parseFloat(B);
+            }
+
+            if (sortOrder.order === 'asc') {
+                return (A < B) ? -1 : (A > B) ? 1 : 0;
+            } else {
+                return (A > B) ? -1 : (A < B) ? 1 : 0;
+            }
+        });
+
+        totalRows = filteredRows.length;
+        displayTable(filteredRows);
+        updatePaginationControls();
+    }
+
+    function displayTable(rows) {
+        var startIndex = (currentPage - 1) * rowsPerPage;
+        var endIndex = startIndex + rowsPerPage;
+        var pageData = rows.slice(startIndex, endIndex);
+
+        var contentHtml = '<div class="filter-buttons">';
+        contentHtml += '<button id="filter-clicks" class="filter-btn">Clicks</button>';
+        contentHtml += '<button id="filter-ga4" class="filter-btn">GA4</button>';
+        contentHtml += '<button id="filter-all" class="filter-btn">All</button>';
+        contentHtml += '</div>';
+        contentHtml += '<h2>' + filteredData[0].campaign_name + ' - [Launch Date: ' + filteredData[0].start_date + ']</h2>';
+        contentHtml += '<table>';
+        contentHtml += '<thead><tr>';
+        contentHtml += '<th>Short Secure URL</th>';
+        contentHtml += '<th>Campaign Content</th>';
+        contentHtml += '<th>Campaign Source</th>';
+        contentHtml += '<th>Campaign Medium</th>';
+        contentHtml += '<th class="sortable" data-sort="clicks_total">Clicks</th>';
+        contentHtml += '<th class="sortable" data-sort="ga_active_users">Users</th>';
+        contentHtml += '<th class="sortable" data-sort="ga_sessions">Sessions</th>';
+        contentHtml += '<th class="sortable" data-sort="ga_average_session_duration">Avg session duration</th>';
+        contentHtml += '<th class="sortable" data-sort="bounce_rate">Bounce rate</th>';
+        contentHtml += '</tr></thead>';
+        contentHtml += '<tbody>';
+
+        pageData.forEach(function(link) {
+            contentHtml += '<tr>';
+            contentHtml += '<td class="short-url">' + (link.short_secure_url || '-') + '</td>';
+            contentHtml += '<td>' + (link.campaign_content || '-') + '</td>';
+            contentHtml += '<td>' + (link.campaign_source || '-') + '</td>';
+            contentHtml += '<td>' + (link.campaign_medium || '-') + '</td>';
+            contentHtml += '<td class="clicks_total">' + (link.clicks_total !== undefined ? link.clicks_total : '-') + '</td>';
+            contentHtml += '<td class="ga_active_users">' + (link.ga_active_users !== undefined ? link.ga_active_users : '-') + '</td>';
+            contentHtml += '<td class="ga_sessions">' + (link.ga_sessions !== undefined ? link.ga_sessions : '-') + '</td>';
+            contentHtml += '<td class="ga_average_session_duration">' + (link.ga_average_session_duration !== undefined ? link.ga_average_session_duration : '-') + '</td>';
+            contentHtml += '<td class="bounce_rate">' + (link.bounce_rate !== undefined ? link.bounce_rate : '-') + '</td>';
+            contentHtml += '</tr>';
+        });
+
+        contentHtml += '</tbody></table>';
+        $('#campaign-content').html(contentHtml);
+
+        // Добавляем индикатор сортировки к заголовку таблицы
+        $('th.sortable').each(function() {
+            var column = $(this).data('sort');
+            if (column === sortOrder.column) {
+                $(this).append(sortOrder.order === 'asc' ? ' ▲' : ' ▼');
+            }
+        });
+
+        addFilterHandlers();
+        addSortHandlers();
+    }
+
+    function updatePaginationControls() {
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+        var paginationHtml = '';
+
+        // Добавляем кнопку "Предыдущая"
+        paginationHtml += `<button class="page-btn prev-btn" ${currentPage === 1 ? 'disabled' : ''}>&laquo; Prev</button>`;
+
+        // Добавляем номера страниц
+        var startPage = Math.max(1, currentPage - 2);
+        var endPage = Math.min(totalPages, startPage + 4);
+
+        if (startPage > 1) {
+            paginationHtml += `<button class="page-btn" data-page="1">1</button>`;
+            if (startPage > 2) {
+                paginationHtml += `<span class="page-ellipsis">...</span>`;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            paginationHtml += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHtml += `<span class="page-ellipsis">...</span>`;
+            }
+            paginationHtml += `<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+
+        // Добавляем кнопку "Следующая"
+        paginationHtml += `<button class="page-btn next-btn" ${currentPage === totalPages ? 'disabled' : ''}>Next &raquo;</button>`;
+
+        $('#pagination-controls').html(paginationHtml);
+
+        $('.page-btn').on('click', function() {
+            if ($(this).hasClass('prev-btn')) {
+                currentPage = Math.max(1, currentPage - 1);
+            } else if ($(this).hasClass('next-btn')) {
+                currentPage = Math.min(totalPages, currentPage + 1);
+            } else {
+                currentPage = parseInt($(this).data('page'));
+            }
+            applyFilterAndSort();
+        });
+    }
+
+    function updateGraph(data) {
+        // Find min and max dates
+        var dates = [];
+        for (var sourceMedium in data) {
+            dates = dates.concat(Object.keys(data[sourceMedium]));
+        }
+        var minDate = new Date(Math.min(...dates.map(date => new Date(date))));
+        var maxDate = new Date(Math.max(...dates.map(date => new Date(date))));
+
+        // Fill missing dates with zeros
+        for (var sourceMedium in data) {
+            var currentData = data[sourceMedium];
+            var filledData = {};
+            var currentDate = new Date(minDate);
+            while (currentDate <= maxDate) {
+                var dateString = currentDate.toISOString().split('T')[0];
+                if (!currentData[dateString]) {
+                    filledData[dateString] = { clicks: 0, sessions: 0 };
+                } else {
+                    filledData[dateString] = currentData[dateString];
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            data[sourceMedium] = filledData;
+        }
+
+        chartData = data;
+        renderGraph();
+    }
+
+    function renderGraph() {
+        if (chart) {
+            chart.destroy();
+        }
+
+        var ctx = document.getElementById('graph-container').getContext('2d');
+        var datasets = [];
+        var colorIndex = 0;
+        var colors = ['rgb(75, 192, 192)', 'rgb(255, 99, 132)', 'rgb(255, 205, 86)', 'rgb(54, 162, 235)', 'rgb(153, 102, 255)'];
+
+        for (var sourceMedium in chartData) {
+            var color = colors[colorIndex % colors.length];
+            if (currentFilter === 'all' || currentFilter === 'clicks') {
+                datasets.push({
+                    label: sourceMedium + ' (Clicks)',
+                    data: Object.entries(chartData[sourceMedium]).map(([date, values]) => ({x: date, y: values.clicks})),
+                    borderColor: color,
+                    backgroundColor: color,
+                    fill: false,
+                    tension: 0.1
+                });
+            }
+            if (currentFilter === 'all' || currentFilter === 'ga4') {
+                datasets.push({
+                    label: sourceMedium + ' (Sessions)',
+                    data: Object.entries(chartData[sourceMedium]).map(([date, values]) => ({x: date, y: values.sessions})),
+                    borderColor: color,
+                    backgroundColor: color,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.1
+                });
+            }
+            colorIndex++;
+        }
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function addFilterHandlers() {
+        $('#filter-clicks, #filter-ga4, #filter-all').on('click', function() {
+            currentFilter = $(this).attr('id').replace('filter-', '');
+            currentPage = 1;
+            applyDefaultSort();
+            applyFilterAndSort();
+            renderGraph();
+        });
+    }
+
+    function addSortHandlers() {
+        $('.sortable').on('click', function() {
+            var column = $(this).data('sort');
+            var order = column === sortOrder.column && sortOrder.order === 'desc' ? 'asc' : 'desc';
+            sortOrder = { column: column, order: order };
+            currentPage = 1;
+            applyFilterAndSort();
+        });
+    }
+
+    // Вызываем applyDefaultSort при инициализации
+    applyDefaultSort();
 });
-
-
-
